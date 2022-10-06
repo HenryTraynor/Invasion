@@ -8,12 +8,12 @@ LVcomp <- function (t, n, parms) {
 }
 
 # initial attributes for species interactions
-initialAtt <- c(b1 = 20,
-                b2 = 30,
-                k1 = 100000,
-                k2 = 100000,
-                a12 = 0.2,
-                a21 = 0.6,
+initialAtt <- c(b1 = .2,
+                b2 = .03,
+                k1 = 100,
+                k2 = 100,
+                a12 = 0.6,
+                a21 = 0.1,
                 delta1 = 0.0,
                 delta2 = 0.3)
 
@@ -28,5 +28,5 @@ d1 <- initialAtt[7]
 d2 <- initialAtt[8]
 
 # initial population size: (species 1, species2)
-initialN <- c(1000,
+initialN <- c(100,
               10)
