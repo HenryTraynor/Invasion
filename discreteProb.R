@@ -1,7 +1,7 @@
-# time scale: ?
+# time scale: year
 library(ggplot2)
 
-tau <- 20
+tau <- 1/52
 time <- 0
 time_max <- 1000
 

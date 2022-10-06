@@ -8,12 +8,12 @@ LVcomp <- function (t, n, parms) {
 }
 
 # initial attributes for species interactions
-initialAtt <- c(b1 = .04,
-                b2 = .01,
+initialAtt <- c(b1 = .05,
+                b2 = .07,
                 k1 = 100,
                 k2 = 100,
-                a12 = 0.3,
-                a21 = 0.6,
+                a12 = 0.6,
+                a21 = 0.3,
                 delta1 = 0.0,
                 delta2 = 0.3)
 
