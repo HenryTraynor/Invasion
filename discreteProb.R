@@ -1,7 +1,7 @@
 # time scale: ?
 library(ggplot2)
 
-tau <- 1
+tau <- 20
 time <- 0
 time_max <- 1000
 
@@ -35,8 +35,6 @@ while(time < time_max) {
   popSize = rbind(popSize, newState)
   time = time+tau
 }
-
-
 
 time = popSize[,1]
 pop1 = popSize[,2]
