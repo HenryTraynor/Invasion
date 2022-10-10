@@ -3,7 +3,7 @@ library(ggplot2)
 
 tau <- 1/52
 time <- 0
-time_max <- 1000
+time_max <- 250
 
 # dN/dt <- B_iN_i - (B_i/K_i)N_i^2 - (B)(a_ij)/K)(N_i)(N_j) + delta
 
