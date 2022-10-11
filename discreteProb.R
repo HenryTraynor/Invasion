@@ -10,6 +10,7 @@ time_max <- 100
 ## integer index 
 step <- 0
 
+
 # dN/dt <- B_iN_i - (B_i/K_i)N_i^2 - (B)(a_ij)/K)(N_i)(N_j) + delta
 
 # (c(species i), c(species j))
