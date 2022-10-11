@@ -7,11 +7,6 @@
 #attParms(b1, b2, k1, k2, a12, a21)
 #timeParms(tau, time_max)
 
-#for testing
-initialN <- c(100,2)
-attParms <- c(0.7, 0.8, 100, 120, 1.2, 0.8)
-timeParms <- c(1/52, 100)
-
 probModel <- function(initialN, attParms, timeParms) {
   tau <- timeParms[1]
   time_max <- timeParms[2]
@@ -47,6 +42,7 @@ probModel <- function(initialN, attParms, timeParms) {
     #delta(pops)
     change <- birth-intra.death-inter.death
     
+    
     #check for double counting
     
     #updating population data in df
@@ -54,9 +50,7 @@ probModel <- function(initialN, attParms, timeParms) {
     
     time=time+tau
   }
+  
+  return(df.pop)
 }
-
-probModel(initialN=initialN, attParms=attParms, timeParms=timeParms)
-
-print(df.pop)
 
