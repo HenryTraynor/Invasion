@@ -15,9 +15,3 @@ probabalistic model of competitive interaction using tau leap method and Poisson
 
 plotsAndSuch.R --
 calls function from model scripts and passed parameters to generate plots and other graphical outputs
-
-**Diary**
-
-(10/10/2022)
-Currently, the probablistic model has been created but requires optimization and file organization needs to be completed for reduced runtime, decreased dependencies, and ease of model iteration. Graphical outputs in ggplot seem to align with predictions made in the deterministic model.
-
