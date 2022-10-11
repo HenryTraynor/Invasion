@@ -14,12 +14,12 @@ probModel <- function(initialN, attParms, timeParms) {
   #indexing
   step <- 1
   #for df initialization
-  numSteps <- as.integer(time_max/tau)
+  numStep <- as.integer(time_max/tau)
   
   #creates df with time and population sizes (0,0)
   df.pop <- data.frame(time=seq(0,time_max, by=tau),
-                       endemic=vector("integer", numSteps+1),
-                       invader=vector("integer", numSteps+1))
+                       endemic=vector("integer", numStep+1),
+                       invader=vector("integer", numStep+1))
   
   #define initial state
   df.pop[1, 2:3] <- initialN
