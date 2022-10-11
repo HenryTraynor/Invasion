@@ -27,28 +27,36 @@ probModel <- function(initialN, attParms, timeParms) {
                        invader=vector("integer", numSteps+1))
   
   #define initial state
-  df.pop[step, 2:3] <- initialN
+  df.pop[1, 2:3] <- initialN
+  
   
   while(time<time_max) {
     step <- step+1
     #populations at current timestep as vector
-    pops <- as.numeric(df.pop[step,])
+    pops <- as.numeric(df.pop[step-1,2:3])
     
     #births
-    rate.birth <- tau*c(attParms[1:2])*pops[2:3]
+    rate.birth <- tau*c(attParms[1:2])*pops[1:2]
     birth = rpois(2, rate.birth)
-    
-    
-    
-    rate.intra <- tau*c(attParms[1:2])/c(attParms[3:4])*pops[2:3]^2
+    #intra-species comp deaths
+    rate.intra <- tau*c(attParms[1:2])/c(attParms[3:4])*pops[1:2]^2
     intra.death <- rpois(2, rate.intra)
-    
-    rate.inter <- tau*c(attParms[1:2])*c(attParms[5:6])/c(attParms[3:4])*pops[2:3]*pops[3:4]
+    #inter-species comp deaths
+    rate.inter <- tau*c(attParms[1:2])*c(attParms[5:6])/c(attParms[3:4])*pops[1]*pops[2]
     inter.death <- rpois(2, rate.inter)
+    #delta(pops)
+    change <- birth-intra.death-inter.death
     
-    print(birth)
+    #check for double counting
     
+    #updating population data in df
+    df.pop[step,2:3] <- pops[1:2] + change[1:2]
     
+    time=time+tau
   }
 }
+
+probModel(initialN=initialN, attParms=attParms, timeParms=timeParms)
+
+print(df.pop)
 
