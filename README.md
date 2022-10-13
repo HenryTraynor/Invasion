@@ -2,6 +2,10 @@
 
 This project aims to create a probablistic model of invasive species model using traditional Lotka-Volterra competition equations. Analysis of these systems will then be directed to develop early warning system parameters for application to populations of invading species.
 
+Equations in Question:
+
+$$3242$$
+
 **Script Descriptions**
 
 initialCon.R --
