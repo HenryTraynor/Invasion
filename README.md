@@ -10,7 +10,7 @@ where,
 
 $N_{i,j} =$ abudance of species i,j
 
-$\beta_{i,j} = $per capita growth rate of species i,j
+$\beta_{i,j} =$ per capita growth rate of species i,j
 
 **Script Descriptions**
 
