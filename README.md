@@ -16,7 +16,7 @@ $K_{i,j} =$ carrying capacity of species i,j agnostic of species j,i
 
 $\alpha_{ij,ji} =$ interspecies competition factor; read "effect of species j,i on species i,j"
 
-**Script Descriptions**
+\header{Script Descriptions}
 
 initialCon.R --
 outlines initial conditions and atttributes of species interactions to be passed through the two model scripts
