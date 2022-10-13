@@ -1,15 +1,23 @@
 library(ggplot2)
 
-initialN <- c(100,20)
-attParms <- c(0.7, 0.8, 100, 120, 1.2, 0.8)
-timeParms <- c(1/365, 100)
+df.popD <- determModel(initial.N, att.param, time.param)
 
-df.pop <- probModel(initialN, attParms, timeParms)
+## set RNG seed for reproducible results:
+set.seed(1)
+df.popP <- probModel(initial.N, att.param, time.param)
 
-colors <- c('Endemic' = 'red', 'Invader' = 'blue')
+colors <- c('Endemic - Deterministic' = 'red',
+            'Invader - Deterministic' = 'blue',
+            'Endemic - Probabilistic' = 'black',
+            'Invader - Probabilistic' = 'yellow')
 
-ggplot(data=df.pop, aes_(x=df.pop[,1], y=df.pop[,3], color='Invader')) +
+ggplot(data=df.popD, aes_(x=df.popP[,1], y=df.popP[,3], color='Invader - Probabilistic')) +
   geom_line() +
-  geom_line(data=df.pop, aes_(x=df.pop[,1], y=df.pop[,2], color='Endemic')) +
+  geom_line(data=df.popP, aes_(x=df.popP[,1], y=df.popP[,2], color='Endemic - Probabilistic')) +
+  geom_line(data=df.popD, aes_(x=df.popD[,1], y=df.popD[,2], color='Endemic - Deterministic')) +
+  geom_line(data=df.popD, aes_(x=df.popP[,1], y=df.popD[,3], color='Invader - Deterministic')) +
   ggtitle('Endemic and Invader Species Abundance') +
   xlab('time (unit time)') + ylab('abundance')
+
+
+
