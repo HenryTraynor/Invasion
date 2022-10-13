@@ -1,12 +1,3 @@
-# time scale: year
-
-## set RNG seed for reproducible results:
-#set.seed(314159)
-
-#initialN(endemic, invader)
-#attParms(b1, b2, k1, k2, a12, a21)
-#timeParms(tau, time_max)
-
 probModel <- function(initialN, attParms, timeParms) {
   tau <- timeParms[1]
   time_max <- timeParms[2]
@@ -23,7 +14,6 @@ probModel <- function(initialN, attParms, timeParms) {
   
   #define initial state
   df.pop[1, 2:3] <- initialN
-  
   
   while(time<time_max) {
     step <- step+1
@@ -42,7 +32,6 @@ probModel <- function(initialN, attParms, timeParms) {
     #delta(pops)
     change <- birth-intra.death-inter.death
     
-    
     #check for double counting
     
     #updating population data in df
@@ -50,7 +39,6 @@ probModel <- function(initialN, attParms, timeParms) {
     
     time=time+tau
   }
-  
   return(df.pop)
 }
 
