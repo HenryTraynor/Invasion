@@ -12,6 +12,10 @@ $N_{i,j} =$ abudance of species i,j
 
 $\beta_{i,j} =$ per capita growth rate of species i,j
 
+$K_{i,j} =$ carrying capacity of species i,j agnostic of species j,i
+
+$\alpha_{ij,ji} =$ interspecies competition factor; read "effect of species j,i on species i,j"
+
 **Script Descriptions**
 
 initialCon.R --
