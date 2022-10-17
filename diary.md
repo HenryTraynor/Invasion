@@ -1,3 +1,5 @@
+This markdown file serves as a log for important updates, mainly so big-picture details can be more easily accessed than in commit messages.
+
 **10/10/2022**
 
 Currently, the probablistic model has been created but requires optimization and file organization needs to be completed for reduced runtime, decreased
