@@ -4,8 +4,8 @@ This project aims to create a probablistic model of invasive species model using
 
 Equations in Question:
 
-$$\frac{dN_i}{dt}=\beta_i N_i(1-\frac{N_i}{K_i}-\alpha_{ij}\frac{N_j}{K_i})$$
-$$\frac{dN_j}{dt}=\beta_j N_j(1-\frac{N_j}{K_j}-\alpha_{ji}\frac{N_i}{K_j})$$
+$$\frac{dN_i}{dt}=\beta_i N_i(1-\frac{N_i}{K_i}-\alpha_{ij}\frac{N_j}{K_i})+\delta_i$$
+$$\frac{dN_j}{dt}=\beta_j N_j(1-\frac{N_j}{K_j}-\alpha_{ji}\frac{N_i}{K_j})+\delta_j$$
 where,
 
 $N_{i,j} =$ abudance of species i,j
@@ -15,6 +15,8 @@ $\beta_{i,j} =$ per capita growth rate of species i,j
 $K_{i,j} =$ carrying capacity of species i,j agnostic of species j,i
 
 $\alpha_{ij,ji} =$ interspecies competition factor; read "effect of species j,i on species i,j"
+
+$\delta_{i,j} =$ immigration factor; units individuals/unit time
 
 
 **Script Descriptions**
