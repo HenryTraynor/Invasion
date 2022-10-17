@@ -29,10 +29,13 @@ probModel <- function(initialN, attParms, timeParms) {
     #inter-species comp deaths
     rate.inter <- tau*c(attParms[1:2])*c(attParms[5:6])/c(attParms[3:4])*pops[1]*pops[2]
     inter.death <- rpois(2, rate.inter)
-    #delta(pops)
-    change <- birth-intra.death-inter.death
+    #immigrations (individuals per unit time)
+    immigration <- rpois(2,tau*c(attParms[7:8]))
     
-    #check for double counting
+    #delta(pops)
+    change <- birth-intra.death-inter.death+immigration
+    
+    #check for double counting; ensures less/eq to events than population
     
     #updating population data in df
     df.pop[step,2:3] <- pops[1:2] + change[1:2]

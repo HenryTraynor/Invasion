@@ -27,10 +27,13 @@ determModel <- function(initialN, attParms, timeParms) {
     intra.death <- tau*c(attParms[1:2])/c(attParms[3:4])*pops[1:2]^2
     #inter-species comp deaths
     inter.death <- tau*c(attParms[1:2])*c(attParms[5:6])/c(attParms[3:4])*pops[1]*pops[2]
-    #delta(pops)
-    change <- birth-intra.death-inter.death
+    #immigrations (individuals per unit time)
+    immigration <- tau*c(attParms[7:8])
     
-    #check for double counting
+    #delta(pops)
+    change <- birth-intra.death-inter.death+immigration
+    
+    #check for double counting; ensures less/eq to events than population
     
     #updating population data in df
     df.pop[step,2:3] <- pops[1:2] + change[1:2]
