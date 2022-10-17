@@ -2,10 +2,11 @@ library(ggplot2)
 
 df.popD <- determModel(initial.N, att.param, time.param)
 
-## set RNG seed for reproducible results:
-set.seed(1)
+# set RNG seed for reproducible results:
+#set.seed(1)
 df.popP <- probModel(initial.N, att.param, time.param)
 
+# ?? check color assignment; not as assigned here
 colors <- c('Endemic - Deterministic' = 'red',
             'Invader - Deterministic' = 'blue',
             'Endemic - Probabilistic' = 'black',
@@ -18,6 +19,3 @@ ggplot(data=df.popD, aes_(x=df.popP[,1], y=df.popP[,3], color='Invader - Probabi
   geom_line(data=df.popD, aes_(x=df.popP[,1], y=df.popD[,3], color='Invader - Deterministic')) +
   ggtitle('Endemic and Invader Species Abundance') +
   xlab('time (unit time)') + ylab('abundance')
-
-
-
