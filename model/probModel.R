@@ -1,6 +1,7 @@
 probModel <- function(initialN, attParms, timeParms) {
   tau <- timeParms[1]
   time_max <- timeParms[2]
+  time_invade <- timeParms[3]
   time <- 0
   #indexing
   step <- 1
@@ -30,10 +31,13 @@ probModel <- function(initialN, attParms, timeParms) {
     rate.inter <- tau*c(attParms[1:2])*c(attParms[5:6])/c(attParms[3:4])*pops[1]*pops[2]
     inter.death <- rpois(2, rate.inter)
     #immigrations (individuals per unit time)
-    immigration <- rpois(2,tau*c(attParms[7:8]))
-    
-    #delta(pops)
-    change <- birth-intra.death-inter.death+immigration
+    if (time >= time_invade) {
+      immigration <- rpois(2,tau*c(attParms[7:8]))
+      change <- birth-intra.death-inter.death+immigration
+    }
+    else {
+      change <- birth-intra.death-inter.death
+    }
     
     #check for double counting; ensures less/eq to events than population
     

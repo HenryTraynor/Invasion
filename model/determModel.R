@@ -1,6 +1,7 @@
 determModel <- function(initialN, attParms, timeParms) {
   tau <- timeParms[1]
   time_max <- timeParms[2]
+  time_invade <- timeParms[3]
   time <- 0
   #indexing
   step <- 1
@@ -28,10 +29,14 @@ determModel <- function(initialN, attParms, timeParms) {
     #inter-species comp deaths
     inter.death <- tau*c(attParms[1:2])*c(attParms[5:6])/c(attParms[3:4])*pops[1]*pops[2]
     #immigrations (individuals per unit time)
-    immigration <- tau*c(attParms[7:8])
-    
+    if(time >= time_invade) {
+      immigration <- tau*c(attParms[7:8])
+      change <- birth-intra.death-inter.death+immigration
+    }
+    else {
+      change <- birth-intra.death-inter.death
+    }
     #delta(pops)
-    change <- birth-intra.death-inter.death+immigration
     
     #check for double counting; ensures less/eq to events than population
     
