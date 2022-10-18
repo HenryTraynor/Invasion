@@ -1,38 +1,38 @@
-probModel <- function(initialN, attParms, timeParms) {
-  tau <- timeParms[1]
-  time_max <- timeParms[2]
-  time_invade <- timeParms[3]
+probModel <- function(initial.N, att.param, time.param) {
+  tau <- time.param[1]
+  time.max <- time.param[2]
+  time.invade <- time.param[3]
   time <- 0
   #indexing
   step <- 1
   #for df initialization
-  numStep <- as.integer(time_max/tau)
+  num.step <- as.integer(time.max/tau)
   
   #creates df with time and population sizes (0,0)
-  df.pop <- data.frame(time=seq(0,time_max, by=tau),
-                       endemic=vector("integer", numStep+1),
-                       invader=vector("integer", numStep+1))
+  df.pop <- data.frame(time=seq(0,time.max, by=tau),
+                       endemic=vector("integer", num.step+1),
+                       invader=vector("integer", num.step+1))
   
   #define initial state
-  df.pop[1, 2:3] <- initialN
+  df.pop[1, 2:3] <- initial.N
   
-  while(time<time_max) {
+  while(time<time.max) {
     step <- step+1
     #populations at current timestep as vector
     pops <- as.numeric(df.pop[step-1,2:3])
     
     #births
-    rate.birth <- tau*c(attParms[1:2])*pops[1:2]
+    rate.birth <- tau*c(att.param[1:2])*pops[1:2]
     birth = rpois(2, rate.birth)
     #intra-species comp deaths
-    rate.intra <- tau*c(attParms[1:2])/c(attParms[3:4])*pops[1:2]^2
+    rate.intra <- tau*c(att.param[1:2])/c(att.param[3:4])*pops[1:2]^2
     intra.death <- rpois(2, rate.intra)
     #inter-species comp deaths
-    rate.inter <- tau*c(attParms[1:2])*c(attParms[5:6])/c(attParms[3:4])*pops[1]*pops[2]
+    rate.inter <- tau*c(att.param[1:2])*c(att.param[5:6])/c(att.param[3:4])*pops[1]*pops[2]
     inter.death <- rpois(2, rate.inter)
     #immigrations (individuals per unit time)
-    if (time >= time_invade) {
-      immigration <- rpois(2,tau*c(attParms[7:8]))
+    if (time >= time.invade) {
+      immigration <- rpois(2,tau*c(att.param[7:8]))
       change <- birth-intra.death-inter.death+immigration
     }
     else {
@@ -48,4 +48,3 @@ probModel <- function(initialN, attParms, timeParms) {
   }
   return(df.pop)
 }
-
