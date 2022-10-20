@@ -1,12 +1,12 @@
 # time scale: years
 
 # initial attributes for species interactions
-att.param <- c(b1 = .12,
+att.param <- c(b1 = .25,
                b2 = .3,
                k1 = 700,
-               k2 = 800,
-               a12 = 1.1,
-               a21 = 0.9,
+               k2 = 700,
+               a12 = 1.05,
+               a21 = 0.95,
                del1 = 0.0,
                del2 = 2)
 
