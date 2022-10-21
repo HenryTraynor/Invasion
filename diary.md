@@ -10,3 +10,7 @@ dependencies, and ease of model iteration. Graphical outputs in ggplot seem to a
 'plotsAndSuch.R' now displays both the deterministic and probabilistic models overlayed with each other for comparison. 'determModel.R' now holds the
 deterministic model which has been replaced with the same code as the probabilistic model without the calls to rpois. This should allow for easier 
 plotting in ggplot and eliminates a package use (deSolve).
+
+**10/21/2022**
+
+Previous week as consisted of final model script optimization and the creation of an interval analysis script titled 'intervalAnalysis.R'. This script will carry out stastical summaries on a given window of population data. Then, this interval will be advance by a given time step that is less than the length of the window. Plotting calculated quantities on the right-hand side of the window against time with confidence intervals for many model iterations is the near goal. Also working on graphing multiple start parameters at a time.
