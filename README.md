@@ -25,8 +25,7 @@ $$\frac{dN_j}{dt}=\beta_j N_j - \frac{\beta_j N_j^2}{K_j} - \alpha_{ji}\frac{\be
 
 These terms represent rate of birth, rate of death from intraspecific competition, rate of death from interspecific competition, and rate of immigration, respectively, for a species.
 
-When multiplied by a given time interval, the expectde number of event for each rate is given. This is the basis of 'contModel.R' and 'probModel.R'.
-
+When multiplied by a given time interval, the expected number of events for each term is given. This is the basis of 'contModel.R' and 'probModel.R'.
 
 **Script Descriptions**
 
