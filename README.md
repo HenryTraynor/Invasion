@@ -21,6 +21,11 @@ $\delta_{i,j} =$ immigration factor; units individuals/unit time
 Note, this distributes into,
 
 $$\frac{dN_i}{dt}=\beta_i N_i - \frac{\beta_i N_i^2}{K_i} - \alpha_{ij}\frac{\beta_i N_i N_j}{K_i}+\delta_i$$
+$$\frac{dN_j}{dt}=\beta_j N_j - \frac{\beta_j N_j^2}{K_j} - \alpha_{ji}\frac{\beta_j N_j N_i}{K_j}+\delta_i$$
+
+These terms represent rate of birth, rate of death from intraspecific competition, rate of death from interspecific competition, and rate of immigration, respectively, for a species.
+
+When multiplied by a given time interval, the expectde number of event for each rate is given. This is the basis of 'contModel.R' and 'probModel.R'.
 
 
 **Script Descriptions**
@@ -28,7 +33,7 @@ $$\frac{dN_i}{dt}=\beta_i N_i - \frac{\beta_i N_i^2}{K_i} - \alpha_{ij}\frac{\be
 initialCon.R --
 outlines initial conditions and atttributes of species interactions to be passed through the two model scripts
 
-contModel.R --
+determModel.R --
 deterministic model of competitive interaction
 
 probModel.R -- 
