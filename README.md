@@ -18,7 +18,7 @@ $\alpha_{ij,ji} =$ interspecies competition factor; read "effect of species j,i 
 
 $\delta_{i,j} =$ immigration factor; units individuals/unit time
 
-Note, this distributes into,
+Note, these equations distribute into the form,
 
 $$\frac{dN_i}{dt}=\beta_i N_i - \frac{\beta_i N_i^2}{K_i} - \alpha_{ij}\frac{\beta_i N_i N_j}{K_i}+\delta_i$$
 $$\frac{dN_j}{dt}=\beta_j N_j - \frac{\beta_j N_j^2}{K_j} - \alpha_{ji}\frac{\beta_j N_j N_i}{K_j}+\delta_i$$
