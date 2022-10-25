@@ -3,8 +3,6 @@ summary <- summary(df.popD$endemic)
 
 time.interval <- c(1, 8/52) #(1 year interval, 8 weeks)
 
-
-
 step <- 0
 time <- 0
 time.step <- time.interval[2]

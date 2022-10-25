@@ -17,5 +17,6 @@ ggplot(data=df.popD, aes_(x=df.popP[,1], y=df.popP[,3], color='Invader - Probabi
   geom_line(data=df.popP, aes_(x=df.popP[,1], y=df.popP[,2], color='Endemic - Probabilistic')) +
   geom_line(data=df.popD, aes_(x=df.popD[,1], y=df.popD[,2], color='Endemic - Deterministic')) +
   geom_line(data=df.popD, aes_(x=df.popP[,1], y=df.popD[,3], color='Invader - Deterministic')) +
-  ggtitle('Endemic and Invader Species Abundance') +
-  xlab('time (unit time)') + ylab('abundance')
+  ggtitle('Endemic and Invader Species Abundance versus Time') +
+  xlab('time (years)') + ylab('abundance')
+
