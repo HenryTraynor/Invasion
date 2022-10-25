@@ -1,29 +1,34 @@
-#summary <- min, 1st Q, median, mean, 3rd Q, max
-summary <- summary(df.popD$endemic)
-
-time.interval <- c(1, 8/52) #(1 year interval, 8 weeks)
-
-step <- 0
-time <- 0
-time.step <- time.interval[2]
-time.range <- time.interval[1]
-time.max <- time.param[2]
-df.pop <- df.popD
-
-num.interval <- as.integer((time.max-time.range)/time.step)
-
-df.summary <- data.frame(interval = seq(0,time.max-time.range,by=time.step),
-                         minimum = vector("double", num.interval+1),
-                         firstQ = vector("double", num.interval+1),
-                         median = vector("double", num.interval+1),
-                         mean = vector("double", num.interval+1),
-                         thirdQ = vector("double", num.interval+1),
-                         max = vector("double", num.interval+1))
-
-while(time < time.max-time.range) {
-  step <- step+1
-  time <- time+time.step
-  summary <- as.numeric(summary(df.pop$endemic[step:step+1]))
-  df.summary[step,2:7] <- summary
+intervalAnalysis <- function(df.sample, time.interval) {
+  time.interval <- time.interval
+  df.sample <- df.sample
+  
+  step <- 1 #index of df.sd
+  time.step <- time.interval[2] 
+  time <- 0
+  time.window <- time.interval[1]
+  time.max <- time.param[2]
+  
+  window <- 0 #index for sd calculation in sample df
+  window.step <- time.interval[2]/time.param[1]
+  
+  df.sample <- df.popD
+  
+  num.interval <- as.integer((time.max-time.window)/time.step)
+  
+  df.sd <- data.frame(interval = seq(time.step,time.max-time.window,by=time.step-1),
+                      endemic = vector("double", num.interval-1),
+                      invader = vector("double", num.interval-1))
+  
+  while (step<length(df.sample$endemic)) {
+    window <- window+window.step
+    
+    start.window <- window-window.step
+    df.sd$endemic[step] <- sd(df.sample$endemic[start.window:window])
+    df.sd$invader[step] <- sd(df.sample$endemic[start.window:window])
+    
+    step <- step+1
+    time <- time+time.step
+  }
+  
+  return(df.sd)
 }
-print(df.summary)
