@@ -1,23 +1,26 @@
 # time scale: years
 
 # initial attributes for species interactions
-att.param <- c(b1 = .25,
-               b2 = .3,
-               k1 = 700,
-               k2 = 700,
-               a12 = 1.05,
-               a21 = 0.95,
-               del1 = 0.0,
-               del2 = 2)
+att.param <- list(n1 = 700,
+                  n2 = 0,
+                  b1 = .2,
+                  b2 = .3,
+                  k1 = 700,
+                  k2 = 900,
+                  a12 = 1.2,
+                  a21 = 0.8,
+                  del1 = 0.0,
+                  del2 = 3)
+
+#initial population sizes (endemic, invader)
 
 #time parameters (tau, time_max, time_invade)
-time.param <- c(1/52,
-                150,
-                0)
+time.param <- list(tau = 1/52,
+                   time.max = 75,
+                   time.invade = 0,
+                   time.window = 1,
+                   window.step = 8/52)
 
 # initial population size: (species 1, species2)
-initial.N <- c(700,
-               0)
 
 # (window, step) - step must be a multiple of tau
-time.interval <- c(1, 8/52) #(1 year interval, 8 weeks)
