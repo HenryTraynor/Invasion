@@ -1,10 +1,13 @@
 library(ggplot2)
 
-df.popD <- modelSim(att.param, time.param, do.determ = TRUE)
+df.popD <- modelSim(att.param, time.param, do.prob = FALSE)
 
 # set RNG seed for reproducible results:
 #set.seed(1)
 df.popP <- modelSim(att.param, time.param)
+
+#standard deviation calculation
+df.sd <- intervalStanDev(df.popP, time.param)
 
 # ?? check color assignment; not as assigned here
 colors <- c('Endemic - Deterministic' = 'red',
@@ -19,3 +22,9 @@ ggplot(data=df.popP, aes_(x=df.popP[,1], y=df.popP[,3], color='Invader - Probabi
   geom_line(data=df.popD, aes_(x=df.popP[,1], y=df.popD[,3], color='Invader - Deterministic')) +
   ggtitle('Endemic and Invader Species Abundance versus Time') +
   xlab('time (years)') + ylab('abundance')
+
+ggplot(data=df.sd, aes_(x=df.sd[,1], y=df.sd[,2], color='SD: Endemic')) +
+  geom_line() +
+  geom_line(data=df.sd, aes_(x=df.sd[,1], y=df.sd[,3], color='SD: Invader')) +
+  ggtitle('Endemic and Invader Interval Standard Deviations') +
+  xlab('time (years)') + ylab('number of individuals')

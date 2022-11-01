@@ -1,5 +1,6 @@
-#b1, b2, k1, k2, a12, a21, del1, del2, tau, time.max, time.invade
-modelSim <- function(att.param, time.param, do.determ = FALSE) {
+#runs model simulation for deterministic or stochastic model; do.prob has default 'TRUE'
+modelSim <- function(att.param, time.param, do.prob = TRUE) {
+  #unpacking of parameters
   n1 <- att.param$n1 
   n2 <- att.param$n2
   b1 <- att.param$b1
@@ -32,39 +33,36 @@ modelSim <- function(att.param, time.param, do.determ = FALSE) {
     step <- step+1
     #populations at current timestep as vector
     pops <- as.numeric(df.pop[step-1,2:3])
-
-    if(do.determ) {
-      birth <- tau*c(b1,b2)*pops[1:2]
-      intra.death <- tau*c(b1,b2)/c(k1,k2)*pops[1:2]^2
-      inter.death <- tau*c(b1,b2)*c(a12,a21)/c(k1,k2)*pops[1]*pops[2]
-      immigration <- 0
-      
-      if(time >= time.invade) {
-        immigration <- tau*c(del1,del2)
-      } 
-    } else {
-      rate.birth <- tau*c(b1,b2)*pops[1:2]
-      birth = rpois(2, rate.birth)
-      #intra-species comp deaths
-      #?? compare with intra.death above
-      rate.intra <- tau*c(b1,b2)/c(k1,k2)*pops[1:2]^2
-      intra.death <- rpois(2, rate.intra)
-      #inter-species comp deaths
-      #?? compare with inter.death above
-      rate.inter <- tau*c(b1,b2)*c(a12,a21)/c(k1,k2)*pops[1]*pops[2]
-      inter.death <- rpois(2, rate.inter)
-      immigration <- 0
-      
-      if (time >= time.invade) {
-        immigration <- rpois(2,tau*c(del1,del2))
-      } 
+    
+    #events are defined for either boolean input 
+    birth <- tau*c(b1,b2)*pops[1:2]
+    intra.death <- tau*c(b1,b2)/c(k1,k2)*pops[1:2]^2
+    inter.death <- tau*c(b1,b2)*c(a12,a21)/c(k1,k2)*pops[1]*pops[2]
+    
+    #now redefined in the case of probabilistic model
+    if(do.prob) {
+      birth <- rpois(2,birth)
+      intra.death <- rpois(2,intra.death)
+      inter.death <- rpois(2,inter.death)
     }
+    
+    #check for invasion time
+    if(time >= time.invade) {
+      immigration <- tau*c(del1,del2)
+      #check for 'do.prob'
+      if(do.prob) {
+        immigration <- rpois(2,immigration)
+      }
+    }
+    else {
+      immigration <- 0
+    }
+    
+    #new entry in df
     change <- birth-intra.death-inter.death+immigration
-
-    #?? It doesn't look like you need to index pops or change here 
-    #?? Both are length-2 vectors, correct? 
     df.pop[step,2:3] <- pops[1:2] + change[1:2]
     
+    #step
     time=time+tau
   }
   return(df.pop)
