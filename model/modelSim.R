@@ -11,6 +11,7 @@ modelSim <- function(att.param, time.param, do.prob = TRUE) {
   a21 <- att.param$a21
   del1 <- att.param$del1
   del2 <- att.param$del2
+  ##  time params
   tau <- time.param$tau
   time.max <- time.param$time.max
   time.invade <- time.param$time.invade
@@ -22,9 +23,12 @@ modelSim <- function(att.param, time.param, do.prob = TRUE) {
   #for df initialization
   num.step <- as.integer(time.max/tau)
   #creates df with time and population sizes (0,0)
-  df.pop <- data.frame(time=seq(0,time.max, by=tau),
-                       endemic=vector("integer", num.step+1),
-                       invader=vector("integer", num.step+1))
+  #!! indent style K&R
+  df.pop <- data.frame(
+    time=seq(0,time.max, by=tau),
+    endemic=vector("integer", num.step+1),
+    invader=vector("integer", num.step+1)
+  )
   
   #define initial state
   df.pop[1, 2:3] <- c(n1,n2)
@@ -53,8 +57,7 @@ modelSim <- function(att.param, time.param, do.prob = TRUE) {
       if(do.prob) {
         immigration <- rpois(2,immigration)
       }
-    }
-    else {
+    } else {
       immigration <- 0
     }
     
