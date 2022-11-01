@@ -1,5 +1,11 @@
 library(ggplot2)
 
+## required files
+source('modelParam.R')
+source('modelSim.R')
+source('../intervalAnalysis.R')
+
+##?? *.param found in file...?
 df.popD <- modelSim(att.param, time.param, do.prob = FALSE)
 
 # set RNG seed for reproducible results:
