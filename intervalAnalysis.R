@@ -7,7 +7,7 @@ intervalStanDev <- function(df.sample, time.param) {
   window.step <- time.param$window.step
   time.max <- time.param$time.max
   
-  #calculation of standard devation values
+  #calculation of standard deviation values
   sd <- rollapply(df.sample[,2:3],
                     FUN="sd",
                     width=time.window/tau,
