@@ -39,8 +39,8 @@ modelSim <- function(att.param, time.param, do.prob = TRUE) {
     pops <- as.numeric(df.pop[step-1,2:3])
     
     #events are defined for either boolean input 
-    birth <- tau*c(b1,b2)*pops[1:2]
-    intra.death <- tau*c(b1,b2)/c(k1,k2)*pops[1:2]^2
+    birth <- tau*c(b1,b2)*pops
+    intra.death <- tau*c(b1,b2)/c(k1,k2)*pops^2
     inter.death <- tau*c(b1,b2)*c(a12,a21)/c(k1,k2)*pops[1]*pops[2]
     
     #now redefined in the case of probabilistic model
@@ -57,13 +57,14 @@ modelSim <- function(att.param, time.param, do.prob = TRUE) {
       if(do.prob) {
         immigration <- rpois(2,immigration)
       }
-    } else {
+    }
+    else {
       immigration <- 0
     }
     
     #new entry in df
     change <- birth-intra.death-inter.death+immigration
-    df.pop[step,2:3] <- pops[1:2] + change[1:2]
+    df.pop[step,2:3] <- pops+change
     
     #step
     time=time+tau
