@@ -11,7 +11,7 @@ modelSim <- function(att.param, time.param, do.prob = TRUE) {
   a21 <- att.param$a21
   del1 <- att.param$del1
   del2 <- att.param$del2
-  ##  time params
+  #time params
   tau <- time.param$tau
   time.max <- time.param$time.max
   time.invade <- time.param$time.invade
@@ -22,7 +22,7 @@ modelSim <- function(att.param, time.param, do.prob = TRUE) {
   
   #for df initialization
   num.step <- as.integer(time.max/tau)
-  #creates df with time and population sizes (0,0)
+  #creates df with time and population sizes (0,0,0)
   #!! indent style K&R
   df.pop <- data.frame(
     time=seq(0,time.max, by=tau),
