@@ -1,4 +1,5 @@
 #runs model simulation for deterministic or stochastic model; do.prob has default 'TRUE'
+#?? different names for params and args
 modelSim <- function(att.param, time.param, do.prob = TRUE) {
   #unpacking of parameters
   n1 <- att.param$n1 
