@@ -12,15 +12,9 @@ att.param <- list(n1 = 700,
                   del1 = 0.0,
                   del2 = 3)
 
-#initial population sizes (endemic, invader)
-
-#time parameters (tau, time_max, time_invade)
+#time parameters
 time.param <- list(tau = 1/52,
                    time.max = 100,
                    time.invade = 0,
                    time.window = 1,
                    window.step = 8/52)
-
-# initial population size: (species 1, species2)
-
-# (window, step) - step must be a multiple of tau

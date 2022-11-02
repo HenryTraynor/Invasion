@@ -1,5 +1,6 @@
 library(zoo)
 
+#returns df of right-haned standard deviation values over a given window for endemic and invasive species indexed with time
 intervalStanDev <- function(df.sample, time.param) {
   #unpacking
   tau <- time.param$tau
