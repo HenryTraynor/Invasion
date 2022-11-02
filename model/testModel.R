@@ -5,6 +5,10 @@ df.popD <- modelSim(att.param, time.param, do.prob = FALSE)
 
 # set RNG seed for reproducible results:
 set.seed(1)
-df.popP <- modelSim(att.param, time.param)
+nsim <- 10
+#?? see help for parallel::mclapply 
+l.popP <- lapply(1:nsim, modelSim,
+    att.param=att.param, time.param=time.param
+)
 
 ##?? how do we test results?
