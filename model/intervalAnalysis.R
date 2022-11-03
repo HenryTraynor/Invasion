@@ -1,9 +1,8 @@
 library(zoo)
 
-#returns df of right-haned standard deviation values over a given window for endemic and invasive species indexed with time
+#returns df of right-handed standard deviation values over a given window for endemic and invasive species indexed with time
 intervalStanDev <- function(df.sample, time.param) {
   #unpacking
-  tau <- time.param$tau
   time.window <- time.param$time.window
   window.step <- time.param$window.step
   time.max <- time.param$time.max
@@ -11,14 +10,17 @@ intervalStanDev <- function(df.sample, time.param) {
   #calculation of standard deviation values
   sd <- rollapply(df.sample[,2:3],
                     FUN="sd",
-                    width=time.window/tau,
-                    by = window.step/tau,
+                    width=time.window,
+                    by = window.step,
                     by.column = TRUE,
                     align = "right")
   
   #combining sd values with time indices
-  sd <- data.frame(time=seq(time.window, time.max, by = window.step), sd)
+  sd <- data.frame(time=seq(time.window,time.max, length.out=nrow(sd)), sd)
   
   return(sd)
 }
+
+
+
 

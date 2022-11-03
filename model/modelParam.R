@@ -16,5 +16,5 @@ att.param <- list(n1 = 700,
 time.param <- list(tau = 1/52,
                    time.max = 100,
                    time.invade = 0,
-                   time.window = 1,
-                   window.step = 8/52)
+                   time.window = 8/52,
+                   window.step = 1)

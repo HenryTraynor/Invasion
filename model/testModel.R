@@ -11,4 +11,6 @@ l.popP <- lapply(1:nsim, modelSim,
     att.param=att.param, time.param=time.param
 )
 
+df.popP <- modelSim(att.param, time.param)
+
 ##?? how do we test results?
