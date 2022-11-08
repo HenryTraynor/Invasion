@@ -14,6 +14,8 @@ df.popD <- modelSim(att.param, time.param, do.prob = FALSE)
 df.popP <- modelSim(att.param, time.param)
 
 #standard deviation calculation
+df.sd <- intervalStanDev(df.popD, time.param)
+
 df.sd <- intervalStanDev(df.popP, time.param)
 
 # ?? check color assignment; not as assigned here
@@ -33,8 +35,7 @@ ggp1 <- ggplot(data=df.popD, aes_(x=df.popD[,1], y=df.popD[,3], color='Invader -
   geom_line() +
   geom_line(data=df.popD, aes_(x=df.popD[,1], y=df.popD[,2], color='Endemic - Probabilistic')) +
   ggtitle('Endemic and Invader Species Abundance versus Time') +
-  xlab('time (years)') + ylab('abundance') +
-  coord_cartesian(xlim = c(0, 100))
+  xlab('time (years)') + ylab('abundance')
 
 ggp2 <- ggplot(data=df.sd, aes_(x=df.sd[,1], y=df.sd[,2], color='SD: Endemic')) +
         geom_line() +
