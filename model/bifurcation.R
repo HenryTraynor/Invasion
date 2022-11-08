@@ -1,4 +1,4 @@
-bifurcationModelSim <- function(att.param, time.param, do.prob = TRUE, comp.ratio) {
+bifurcationModelSim <- function(att.param, time.param, do.prob = FALSE, comp.ratio) {
   #unpacking of parameters
   n1 <- att.param$n1 
   n2 <- att.param$n2
@@ -74,11 +74,33 @@ bifurcationModelSim <- function(att.param, time.param, do.prob = TRUE, comp.rati
 numRealizations <- 10
 count <- 0
 
-ratio.max = 2
+ratio.max <- 2
 
 ratio.set <- seq(0,ratio.max,by=ratio.max/numRealizations)
 
+df.bifurcation <- data.frame(
+  ratio.index=seq(0,ratio.max, by=ratio.max/numRealizations),
+  endemic=vector("integer", numRealizations+1),
+  invader=vector("integer", numRealizations+1)
+)
+
 while(count < numRealizations) {
-  ratio <
+  count <- count+1
+  ratio <- ratio.set[count]
+  df.bifurcation[count,2:3] <- bifurcationModelSim(att.param, time.param, do.prob=FALSE, comp.ratio=ratio)
 }
+
+ggp1 <- ggplot(data=df.bifurcation, aes_(x=df.bifurcation[,1], y=df.bifurcation[,3], color='Invader')) +
+  geom_line() +
+  geom_line(data=df.bifurcation, aes_(x=df.bifurcation[,1], y=df.bifurcation[,2], color='Endemic')) +
+  ggtitle('test') +
+  xlab('interspecific ratio') + ylab('final count')
+
+grid.arrange(ggp1, ncol=1)
+
+
+
+
+
+
 
