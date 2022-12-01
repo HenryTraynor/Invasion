@@ -35,7 +35,8 @@ ggp1 <- ggplot(data=df.popD, aes_(x=df.popD[,1], y=df.popD[,3], color='Invader -
   geom_line() +
   geom_line(data=df.popD, aes_(x=df.popD[,1], y=df.popD[,2], color='Endemic - Probabilistic')) +
   ggtitle('Endemic and Invader Species Abundance versus Time') +
-  xlab('time (years)') + ylab('abundance')
+  xlab('time (years)') + ylab('abundance') +
+  theme(legend.position = "bottom")
 
 ggp2 <- ggplot(data=df.sd, aes_(x=df.sd[,1], y=df.sd[,2], color='SD: Endemic')) +
         geom_line() +
