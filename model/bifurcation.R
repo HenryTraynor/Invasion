@@ -84,7 +84,7 @@ df.bifurcation <- data.frame(
   invader=vector("integer", numRealizations+1)
 )
 
-while(count < numRealizations) {
+while(count < numRealizations+1) {
   count <- count+1
   ratio <- ratio.set[count]
   df.bifurcation[count,2:3] <- bifurcationModelSim(att.param, time.param, do.prob=FALSE, comp.ratio=ratio)
@@ -93,7 +93,7 @@ while(count < numRealizations) {
 ggp1 <- ggplot(data=df.bifurcation, aes_(x=df.bifurcation[,1], y=df.bifurcation[,3], color='Invader')) +
   geom_line() +
   geom_line(data=df.bifurcation, aes_(x=df.bifurcation[,1], y=df.bifurcation[,2], color='Endemic')) +
-  ggtitle('test') +
+  ggtitle('Equilibrium Populations vs. a12/a21') +
   xlab('interspecific ratio') + ylab('final count')
 
 grid.arrange(ggp1, ncol=1)
