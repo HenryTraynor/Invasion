@@ -10,7 +10,9 @@ att.param <- list(n1 = 700,
                   a12 = 1,
                   a21 = 0.9,
                   del1 = 0,
-                  del2 = 0)
+                  del2 = 0,
+                  a11 = 1,
+                  a22 = 1)
 
 #time parameters
 time.param <- list(tau = 1/52,

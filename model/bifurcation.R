@@ -6,10 +6,12 @@ bifurcationModelSim <- function(att.param, time.param, do.prob = FALSE, comp.rat
   b2 <- att.param$b2
   k1 <- att.param$k1
   k2 <- att.param$k2
-  a12 <- att.param$a21*comp.ratio
+  a12 <- att.param$a22*comp.ratio
   a21 <- att.param$a21
   del1 <- att.param$del1
   del2 <- att.param$del2
+  a11 <- att.param$a11
+  a22 <- att.param$a22
   #time params
   tau <- time.param$tau
   time.max <- time.param$time.max
@@ -39,7 +41,7 @@ bifurcationModelSim <- function(att.param, time.param, do.prob = FALSE, comp.rat
     
     #events are defined for either boolean input 
     birth <- tau*c(b1,b2)*pops
-    intra.death <- tau*c(b1,b2)/c(k1,k2)*pops^2
+    intra.death <- tau*c(b1,b2)/c(k1,k2)*pops^2*c(a11,a22)
     inter.death <- tau*c(b1,b2)*c(a12,a21)/c(k1,k2)*pops[1]*pops[2]
     
     #now redefined in the case of probabilistic model
@@ -71,7 +73,7 @@ bifurcationModelSim <- function(att.param, time.param, do.prob = FALSE, comp.rat
   return(c(df.pop[nrow(df.pop),2], df.pop[nrow(df.pop),3]))
 }
 
-numRealizations <- 10
+numRealizations <- 20
 count <- 0
 
 ratio.max <- 2
