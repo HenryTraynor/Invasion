@@ -10,8 +10,8 @@ bifurcationModelSim <- function(att.param, time.param, do.prob = FALSE, comp.rat
   k1 <- att.param$k1
   k2 <- att.param$k2
   #interspecific
-  a12 <- comp.ratio
-  a21 <- att.param$a21
+  a12 <- 1
+  a21 <- 1/comp.ratio
   #intraspecific
   a11 <- att.param$a11
   a22 <- att.param$a22
@@ -80,7 +80,7 @@ bifurcationModelSim <- function(att.param, time.param, do.prob = FALSE, comp.rat
   return(c(df.pop[nrow(df.pop),2], df.pop[nrow(df.pop),3]))
 }
 
-numRealizations <- 20
+numRealizations <- 30
 count <- 0
 
 ratio.max <- 2
