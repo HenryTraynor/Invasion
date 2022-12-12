@@ -31,9 +31,9 @@ ggp1 <- ggplot(data=df.popP, aes_(x=df.popP[,1], y=df.popP[,3], color='Invader -
         xlab('time (years)') + ylab('abundance') +
         coord_cartesian(xlim = c(0, 100))
 
-ggp1 <- ggplot(data=df.popD, aes_(x=df.popD[,1], y=df.popD[,3], color='Invader - Probabilistic')) +
+ggp1 <- ggplot(data=df.popD, aes_(x=df.popD[,1], y=df.popD[,3], color='Invader')) +
   geom_line() +
-  geom_line(data=df.popD, aes_(x=df.popD[,1], y=df.popD[,2], color='Endemic - Probabilistic')) +
+  geom_line(data=df.popD, aes_(x=df.popD[,1], y=df.popD[,2], color='Endemic')) +
   ggtitle('Endemic and Invader Species Abundance versus Time') +
   xlab('time (years)') + ylab('abundance') +
   theme(legend.position = "bottom")
