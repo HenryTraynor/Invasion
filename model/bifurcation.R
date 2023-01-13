@@ -1,17 +1,24 @@
 bifurcationModelSim <- function(att.param, time.param, do.prob = FALSE, comp.ratio) {
   #unpacking of parameters
+  #pop states
   n1 <- att.param$n1 
   n2 <- att.param$n2
+  #birth rates
   b1 <- att.param$b1
   b2 <- att.param$b2
+  #carrying capacities
   k1 <- att.param$k1
   k2 <- att.param$k2
-  a12 <- att.param$a22*comp.ratio
+  #interspecific
+  a12 <- comp.ratio
   a21 <- att.param$a21
-  del1 <- att.param$del1
-  del2 <- att.param$del2
+  #intraspecific
   a11 <- att.param$a11
   a22 <- att.param$a22
+  #immigration
+  del1 <- att.param$del1
+  del2 <- att.param$del2
+  
   #time params
   tau <- time.param$tau
   time.max <- time.param$time.max

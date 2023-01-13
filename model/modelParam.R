@@ -2,21 +2,21 @@
 
 # initial attributes for species interactions
 att.param <- list(n1 = 700,
-                  n2 = 5,
-                  b1 = .3,
-                  b2 = .5,
+                  n2 = 0,
+                  b1 = 1,
+                  b2 = 1,
                   k1 = 700,
                   k2 = 700,
                   a12 = 1,
-                  a21 = 0.9,
-                  del1 = 0,
-                  del2 = 0,
+                  a21 = 1,
                   a11 = 1,
-                  a22 = 1)
+                  a22 = 1,
+                  del1 = 0,
+                  del2 = 2)
 
 #time parameters
 time.param <- list(tau = 1/52,
-                   time.max = 175,
+                   time.max = 250,
                    time.invade = 0,
-                   time.window = 8/52,
-                   window.step = 1)
+                   time.window = 156,
+                   window.step = 3)
