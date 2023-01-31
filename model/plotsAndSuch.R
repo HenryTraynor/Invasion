@@ -1,8 +1,7 @@
 library(ggplot2)
 library(gridExtra)
-library(mmtable2)
 
-## required files
+ ## required files
 source('modelParam.R')
 source('modelSim.R')
 source('../intervalAnalysis.R')
@@ -25,7 +24,23 @@ colors <- c('Endemic - Deterministic' = 'red',
             'Endemic - Probabilistic' = 'black',
             'Invader - Probabilistic' = 'yellow')
 
-mytable <- cbind(param=c("b1", "b2", "k1", "k2", "a12", "a21"), value=as.data.frame(att.param[3:8]), row.names=NULL)
+test <- t(as.data.frame(att.param[3:8]))
+
+colNames <- c("n1",
+              "n2",
+              "b1",
+              "b2",
+              "k1",
+              "k2",
+              "a12",
+              "a21",
+              "a11",
+              "a22",
+              "del1",
+              "del2",
+              "tau")
+
+param.table <- cbind(as.data.frame(att.param), as.data.frame(time.param[1]), row.names=NULL)
 
 ggp1 <- ggplot(data=df.popP, aes_(x=df.popP[,1], y=df.popP[,3], color='Invader - Probabilistic')) +
         geom_line() +
@@ -40,7 +55,6 @@ ggp2 <- ggplot(data=df.popD, aes_(x=df.popD[,1], y=df.popD[,3], color='Invader')
   ggtitle('Endemic and Invader Species Abundance versus Time') +
   xlab('time (years)') + ylab('abundance') +
   theme(legend.position = "bottom")
-  #annotation_custom(tableGrob(mytable), xmin=40, xmax=60, ymin=5, ymax=20)
 
 ggp2 <- ggplot(data=df.sd, aes_(x=df.sd[,1], y=df.sd[,2], color='SD: Endemic')) +
         geom_line() +
@@ -49,4 +63,6 @@ ggp2 <- ggplot(data=df.sd, aes_(x=df.sd[,1], y=df.sd[,2], color='SD: Endemic')) 
         xlab('time (years)') + ylab('number of individuals') +
         coord_cartesian(xlim = c(0, 100))
 
-grid.arrange(ggp1, ggp2, mytable, ncol=1)
+grid.arrange(ggp1, ggp2, tableGrob(mytable))
+
+grid.arrange(ggp1, ggp2, tableGrob(param.table), heights=c(3,3,1), ncol=1)
