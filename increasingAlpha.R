@@ -1,3 +1,6 @@
+library(ggplot2)
+library(gridExtra)
+
 alphaSim <- function(att.param, time.param, do.prob = TRUE, ratio.max) {
   
   #unpacking of parameters
