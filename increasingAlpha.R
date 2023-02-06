@@ -32,7 +32,8 @@ alphaSim <- function(att.param, time.param, do.prob = TRUE, ratio.max) {
   df.pop <- data.frame(
     time=seq(0,time.max, by=tau),
     endemic=vector("integer", num.step+1),
-    invader=vector("integer", num.step+1)
+    invader=vector("integer", num.step+1),
+    ratio=vector("double", num.step+1)
   )
   
   #define initial state
@@ -45,7 +46,7 @@ alphaSim <- function(att.param, time.param, do.prob = TRUE, ratio.max) {
   
   while(time<time.max) {
     step <- step+1
-    a21 <- 1/ratio.set[step-1]
+    a21 <- (1/ratio.set[step-1])
     #populations at current timestep as vector
     pops <- as.numeric(df.pop[step-1,2:3])
     
@@ -79,16 +80,18 @@ alphaSim <- function(att.param, time.param, do.prob = TRUE, ratio.max) {
     
     #new entry in df
     change <- birth-intra.death-inter.death+immigration
-    if (change[1] > pops[1] && change[1]<0) {
+    if (abs(change[1]) > pops[1] && change[1]<0) {
       change[1] <- 0
     } 
-    if (change[2] > pops[2] && change[2]<0) {
+    if (abs(change[2]) > pops[2] && change[2]<0) {
       change[2] <- 0
     }
     df.pop[step,2:3] <- pops+change
     
     #step
     time=time+tau
+    
+    df.pop[step,4] <- a12/a21
   }
   return(df.pop)
 }
@@ -100,7 +103,8 @@ ggp1 <- ggplot(data=df.alphaSim, aes_(x=df.alphaSim[,1], y=df.alphaSim[,2], colo
   geom_line(data=df.alphaSim, aes_(x=df.alphaSim[,1], y=df.alphaSim[,3], color='Invader - Probabilistic')) +
   ggtitle('Endemic and Invader Species Abundance versus Time') +
   xlab('time (years)') + ylab('abundance') +
-  theme(legend.position = "bottom")
+  theme(legend.position = "bottom") +
+  geom_vline(xintercept=time.param$time.max/2, linetype='dashed', color='black')
 
 df.sd <- intervalStanDev(df.alphaSim, time.param, fun.call="sd")
 
@@ -109,7 +113,8 @@ ggp2 <- ggplot(data=df.sd, aes_(x=df.sd[,1], y=df.sd[,3], color='SD: invader')) 
   ggtitle('Invader Interval Standard Deviations') +
   xlab('time (years)') + ylab('number of individuals') +
   theme(legend.position = "bottom") +
-  coord_cartesian(xlim = c(0, time.param$time.max))
+  coord_cartesian(xlim = c(0, time.param$time.max)) +
+  geom_vline(xintercept=time.param$time.max/2, linetype='dashed', color='black')
 
 df.var <- intervalStanDev(df.alphaSim, time.param, fun.call="var")
 
@@ -118,7 +123,16 @@ ggp3 <- ggplot(data=df.var, aes_(x=df.var[,1], y=df.var[,3], color='var: invader
   ggtitle('Invader Interval Variance') +
   xlab('time (years)') + ylab('number of individuals') +
   theme(legend.position = "bottom") +
-  coord_cartesian(xlim = c(0, time.param$time.max))
+  coord_cartesian(xlim = c(0, time.param$time.max)) +
+  geom_vline(xintercept=time.param$time.max/2, linetype='dashed', color='black')
+
+ggp4 <- ggplot(data=df.alphaSim, aes_(x=df.alphaSim[,1], y=df.alphaSim[,4], color='Ratio: a12/a21')) +
+  geom_line() +
+  ggtitle('Interspecific Comp. Ratio versus Time') +
+  xlab('time (years)') + ylab('a12/a21') +
+  theme(legend.position = 'bottom') +
+  geom_segment(x=0, y=1, xend=time.param$time.max/2, yend=1, linetype='dashed', color='black') +
+  geom_segment(y=0, x=time.param$time.max/2, yend=1, xend=time.param$time.max/2, linetype='dashed', color='black')
 
 
 grid.arrange(ggp1, ncol=1)
