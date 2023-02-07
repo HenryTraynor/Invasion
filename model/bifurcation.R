@@ -86,6 +86,7 @@ count <- 0
 ratio.max <- 2
 
 ratio.set <- seq(0,ratio.max,by=ratio.max/numRealizations)
+ratio.set[1] <- ratio.set[2]/2
 
 df.bifurcation <- data.frame(
   ratio.index=seq(0,ratio.max, by=ratio.max/numRealizations),

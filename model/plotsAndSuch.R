@@ -24,8 +24,6 @@ colors <- c('Endemic - Deterministic' = 'red',
             'Endemic - Probabilistic' = 'black',
             'Invader - Probabilistic' = 'yellow')
 
-test <- t(as.data.frame(att.param[3:8]))
-
 colNames <- c("n1",
               "n2",
               "b1",

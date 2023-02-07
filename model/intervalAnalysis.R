@@ -23,4 +23,3 @@ intervalStanDev <- function(df.sample, time.param, fun.call) {
 
 
 
-
