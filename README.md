@@ -43,3 +43,6 @@ probabalistic model of competitive interaction using tau leap method and Poisson
 
 plotsAndSuch.R --
 calls function from model scripts and passed parameters to generate plots and other graphical outputs
+*
+*
+*
