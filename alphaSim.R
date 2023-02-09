@@ -10,8 +10,8 @@ alphaSim <- function(att.param, time.param, do.prob = TRUE, ratio.max) {
   b2 <- att.param$b2
   k1 <- att.param$k1
   k2 <- att.param$k2
-  a12 <- 1
-  a21 <- 1
+  a12 <- att.param$a12
+  a21 <- att.param$a21
   a11 <- att.param$a11
   a22 <- att.param$a22
   del1 <- att.param$del1
@@ -135,5 +135,5 @@ ggp4 <- ggplot(data=df.alphaSim, aes_(x=df.alphaSim[,1], y=df.alphaSim[,4], colo
   geom_segment(y=0, x=time.param$time.max/2, yend=1, xend=time.param$time.max/2, linetype='dashed', color='black')
 
 
-grid.arrange(ggp1, ncol=1)
+grid.arrange(ggp1, ggp4, ncol=1)
 
