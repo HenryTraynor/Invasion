@@ -1,12 +1,12 @@
 # time scale: years
 
 # initial attributes for species interactions
-att.param <- list(n1 = 100,
+att.param <- list(n1 = 500,
                   n2 = 0,
                   b1 = 0.50,
                   b2 = 0.50,
-                  k1 = 100,
-                  k2 = 100,
+                  k1 = 500,
+                  k2 = 500,
                   a12 = 1,
                   a21 = 1,
                   a11 = 1,
@@ -15,8 +15,9 @@ att.param <- list(n1 = 100,
                   del2 = 2)
 
 #time parameters
-time.param <- list(tau = 1/104,
-                   time.max = 200,
+time.param <- list(tau = 1/365,
+                   time.max = 300,
                    time.invade = 0,
-                   time.window = 2.5,
-                   window.step = 0.5)
+                   time.window = 30,
+                   window.step = 1,
+                   ttb = 100)
