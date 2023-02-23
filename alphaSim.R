@@ -1,7 +1,7 @@
 library(ggplot2)
 library(gridExtra)
 
-alphaSim <- function(att.param, time.param, do.prob = TRUE) {
+alphaSim <- function(att.param, time.param, do.prob = TRUE, ratio.max) {
   
   #unpacking of parameters
   n1 <- att.param$n1 
@@ -10,17 +10,16 @@ alphaSim <- function(att.param, time.param, do.prob = TRUE) {
   b2 <- att.param$b2
   k1 <- att.param$k1
   k2 <- att.param$k2
-  a12 <- att.param$a12
-  a21 <- att.param$a21
-  a11 <- att.param$a11
-  a22 <- att.param$a22
+  a12 <- 1
+  a21 <- 1
+  a11 <- 1
+  a22 <- 1
   del1 <- att.param$del1
   del2 <- att.param$del2
   #time params
   tau <- time.param$tau
-  time.max <- time.param$time.max
+  time.max <- time.param$ttb * 2
   time.invade <- time.param$time.invade
-  ttb <- time.param$ttb
   
   #indexing
   time <- 0
@@ -42,10 +41,12 @@ alphaSim <- function(att.param, time.param, do.prob = TRUE) {
   
   
   #a12 for each step
+  ratio.set <- seq(0,ratio.max,by=ratio.max/num.step)
+  ratio.set[1] <- ratio.set[2]/2
   
   while(time<time.max) {
     step <- step+1
-    a21 <- 1/((1/ttb)*time)
+    a21 <- a12/ratio.set[step]
     #populations at current timestep as vector
     pops <- as.numeric(df.pop[step-1,2:3])
     
@@ -95,7 +96,7 @@ alphaSim <- function(att.param, time.param, do.prob = TRUE) {
   return(df.pop)
 }
 
-df.alphaSim <- alphaSim(att.param, time.param)
+df.alphaSim <- alphaSim(att.param, time.param, ratio.max=2)
 
 ggp1 <- ggplot(data=df.alphaSim, aes_(x=df.alphaSim[,1], y=df.alphaSim[,2], color='Endemic - Probabilistic')) +
   geom_line() +
@@ -103,16 +104,9 @@ ggp1 <- ggplot(data=df.alphaSim, aes_(x=df.alphaSim[,1], y=df.alphaSim[,2], colo
   ggtitle('Endemic and Invader Species Abundance versus Time') +
   xlab('time (years)') + ylab('abundance') +
   theme(legend.position = "bottom") +
-  geom_vline(xintercept=time.param$ttb, linetype='dashed', color='black')
+  geom_vline(xintercept=time.param$time.max/2, linetype='dashed', color='black')
 
-ggp1 <- ggplot(data=df.alphaSim, aes_(x=df.alphaSim[,1], y=df.alphaSim[,3], color='Invader - Probabilistic')) +
-  geom_line() +
-  ggtitle('Invader Species Abundance versus Time') +
-  xlab('time (years)') + ylab('abundance') +
-  theme(legend.position = "bottom") +
-  geom_vline(xintercept=time.param$ttb, linetype='dashed', color='black')
-
-df.sd <- intervalStat(df.alphaSim, time.param, fun.call="sd")
+df.sd <- intervalStanDev(df.alphaSim, time.param, fun.call="sd")
 
 ggp2 <- ggplot(data=df.sd, aes_(x=df.sd[,1], y=df.sd[,3], color='SD: invader')) +
   geom_line()  +
@@ -120,9 +114,9 @@ ggp2 <- ggplot(data=df.sd, aes_(x=df.sd[,1], y=df.sd[,3], color='SD: invader')) 
   xlab('time (years)') + ylab('number of individuals') +
   theme(legend.position = "bottom") +
   coord_cartesian(xlim = c(0, time.param$time.max)) +
-  geom_vline(xintercept=time.param$ttb, linetype='dashed', color='black')
+  geom_vline(xintercept=time.param$time.max/2, linetype='dashed', color='black')
 
-df.var <- intervalStat(df.alphaSim, time.param, fun.call="var")
+df.var <- intervalStanDev(df.alphaSim, time.param, fun.call="var")
 
 ggp3 <- ggplot(data=df.var, aes_(x=df.var[,1], y=df.var[,3], color='var: invader')) +
   geom_line() +
@@ -130,16 +124,15 @@ ggp3 <- ggplot(data=df.var, aes_(x=df.var[,1], y=df.var[,3], color='var: invader
   xlab('time (years)') + ylab('number of individuals') +
   theme(legend.position = "bottom") +
   coord_cartesian(xlim = c(0, time.param$time.max)) +
-  geom_vline(xintercept=time.param$ttb, linetype='dashed', color='black')
+  geom_vline(xintercept=time.param$time.max/2, linetype='dashed', color='black')
 
-ggp4 <- ggplot(data=df.alphaSim, aes_(x=df.alphaSim[,1], y=df.alphaSim[,4], color='Ratio: a12/a21')) +
+ggp4 <- ggplot(data=df.alphaSim, aes_(x=df.alphaSim[,1], y=df.alphaSim[,4], color='Ratio: a12/a22')) +
   geom_line() +
   ggtitle('Interspecific Comp. Ratio versus Time') +
-  xlab('time (years)') + ylab('a12/a21') +
+  xlab('time (years)') + ylab('a12/a22') +
   theme(legend.position = 'bottom') +
   geom_segment(x=0, y=1, xend=time.param$ttb, yend=1, linetype='dashed', color='black') +
   geom_segment(y=0, x=time.param$ttb, yend=1, xend=time.param$ttb, linetype='dashed', color='black')
 
 
-grid.arrange(ggp1, ggp2, ggp3, ggp4, ncol=2)
-
+grid.arrange(ggp1, ggp4, ncol=1)
