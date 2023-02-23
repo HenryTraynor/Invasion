@@ -18,7 +18,7 @@ etaSim <- function(att.param, time.param, do.prob = TRUE, ratio.max) {
   del2 <- att.param$del2
   #time params
   tau <- time.param$tau
-  time.max <- time.param$time.max
+  time.max <- time.param$ttb * 2
   time.invade <- time.param$time.invade
   
   #indexing
@@ -46,7 +46,7 @@ etaSim <- function(att.param, time.param, do.prob = TRUE, ratio.max) {
   
   while(time<time.max) {
     step <- step+1
-    a22 <- a12/ratio.set[step]
+    a21 <- a12/ratio.set[step]
     #populations at current timestep as vector
     pops <- as.numeric(df.pop[step-1,2:3])
     
@@ -91,7 +91,7 @@ etaSim <- function(att.param, time.param, do.prob = TRUE, ratio.max) {
     #step
     time=time+tau
     
-    df.pop[step,4] <- a12/a22
+    df.pop[step,4] <- a12/a21
   }
   return(df.pop)
 }
@@ -131,8 +131,8 @@ ggp4 <- ggplot(data=df.etaSim, aes_(x=df.etaSim[,1], y=df.etaSim[,4], color='Rat
   ggtitle('Interspecific Comp. Ratio versus Time') +
   xlab('time (years)') + ylab('a12/a22') +
   theme(legend.position = 'bottom') +
-  geom_segment(x=0, y=1, xend=time.param$time.max/2, yend=1, linetype='dashed', color='black') +
-  geom_segment(y=0, x=time.param$time.max/2, yend=1, xend=time.param$time.max/2, linetype='dashed', color='black')
+  geom_segment(x=0, y=1, xend=time.param$ttb, yend=1, linetype='dashed', color='black') +
+  geom_segment(y=0, x=time.param$ttb, yend=1, xend=time.param$ttb, linetype='dashed', color='black')
 
 
 grid.arrange(ggp1, ggp4, ncol=1)
