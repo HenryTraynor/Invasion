@@ -49,14 +49,19 @@ alphaSim <- function(att.param, time.param, do.prob = TRUE, ratio.max) {
     
     #events are defined for either boolean input 
     birth <- tau*c(b1,b2)*pops
-    intra.death <- tau*c(b1,b2)*c(a11,a22)/c(k1,k2)*pops^2
-    inter.death <- tau*c(b1,b2)*c(a12,a21)/c(k1,k2)*pops[1]*pops[2]
+    intra.death <- abs(tau*c(b1,b2)*c(a11,a22)/c(k1,k2)*pops^2)
+    inter.death <- abs(tau*c(b1,b2)*c(a12,a21)/c(k1,k2)*pops[1]*pops[2])
     
     #now redefined in the case of probabilistic model
     if(do.prob) {
       birth <- rpois(2,birth)
       intra.death <- rpois(2,intra.death)
-      inter.death <- rpois(2,inter.death)
+      if(0.999*.Machine$integer.max[1] > inter.death[1] || 0.999*.Machine$integer.max[2] > inter.death[2]) {
+        inter.death = round(rnorm(2,mean=inter.death,sd=sqrt(inter.death)))
+      }
+      else{
+        inter.death <- rpois(2,inter.death)
+      }
     }
     
     #check for invasion time
@@ -70,10 +75,6 @@ alphaSim <- function(att.param, time.param, do.prob = TRUE, ratio.max) {
     else {
       immigration <- 0
     }
-    
-    #if((time/tau)%%156==0) {
-    #  immigration <- 20
-    #}
     
     #new entry in df
     change <- birth-intra.death-inter.death+immigration
