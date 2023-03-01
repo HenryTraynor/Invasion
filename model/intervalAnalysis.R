@@ -1,11 +1,12 @@
 library(zoo)
+library(moments)
 
 #returns df of right-handed standard deviation values over a given window for endemic and invasive species indexed with time
-intervalStat <- function(df.sample, time.param, fun.call) {
+intervalAnalysis <- function(df.sample, time.param, fun.call) {
   #unpacking
   time.window <- time.param$time.window
   window.step <- time.param$window.step
-  time.max <- time.param$time.max
+  time.max <- time.param$ttb*2
   tau <- time.param$tau
   
   #calculation of standard deviation values
