@@ -14,7 +14,7 @@ modelSim <- function(att.param, time.param, do.prob = TRUE) {
   del2 <- att.param$del2
   #time params
   tau <- time.param$tau
-  time.max <- time.param$time.max
+  time.max <- time.param$ttb*2
   time.invade <- time.param$time.invade
   
   #indexing
