@@ -1,5 +1,6 @@
 library(ggplot2)
 library(gridExtra)
+library(rshift)
 
 alphaSim <- function(att.param, time.param, do.prob = TRUE, ratio.max) {
   
@@ -106,25 +107,25 @@ ggp1 <- ggplot(data=df.alphaSim, aes_(x=df.alphaSim[,1], y=df.alphaSim[,2], colo
   theme(legend.position = "bottom") +
   geom_vline(xintercept=time.param$time.max/2, linetype='dashed', color='black')
 
-df.sd <- intervalStanDev(df.alphaSim, time.param, fun.call="sd")
+df.sd <- intervalAnalysis(df.alphaSim, time.param, fun.call="sd")
 
 ggp2 <- ggplot(data=df.sd, aes_(x=df.sd[,1], y=df.sd[,3], color='SD: invader')) +
   geom_line()  +
   ggtitle('Invader Interval Standard Deviations') +
   xlab('time (years)') + ylab('number of individuals') +
   theme(legend.position = "bottom") +
-  coord_cartesian(xlim = c(0, time.param$time.max)) +
-  geom_vline(xintercept=time.param$time.max/2, linetype='dashed', color='black')
+  coord_cartesian(xlim = c(0, time.param$ttb*2)) +
+  geom_vline(xintercept=time.param$ttb, linetype='dashed', color='black')
 
-df.var <- intervalStanDev(df.alphaSim, time.param, fun.call="var")
+df.var <- intervalAnalysis(df.alphaSim, time.param, fun.call="var")
 
 ggp3 <- ggplot(data=df.var, aes_(x=df.var[,1], y=df.var[,3], color='var: invader')) +
   geom_line() +
   ggtitle('Invader Interval Variance') +
   xlab('time (years)') + ylab('number of individuals') +
   theme(legend.position = "bottom") +
-  coord_cartesian(xlim = c(0, time.param$time.max)) +
-  geom_vline(xintercept=time.param$time.max/2, linetype='dashed', color='black')
+  coord_cartesian(xlim = c(0, time.param$ttb*2)) +
+  geom_vline(xintercept=time.param$ttb, linetype='dashed', color='black')
 
 ggp4 <- ggplot(data=df.alphaSim, aes_(x=df.alphaSim[,1], y=df.alphaSim[,4], color='Ratio: a12/a22')) +
   geom_line() +
@@ -134,5 +135,35 @@ ggp4 <- ggplot(data=df.alphaSim, aes_(x=df.alphaSim[,1], y=df.alphaSim[,4], colo
   geom_segment(x=0, y=1, xend=time.param$ttb, yend=1, linetype='dashed', color='black') +
   geom_segment(y=0, x=time.param$ttb, yend=1, xend=time.param$ttb, linetype='dashed', color='black')
 
+df.kurtosis <- intervalAnalysis(df.alphaSim, time.param, fun.call='kurtosis')
 
-grid.arrange(ggp1, ggp4, ncol=1)
+ggp5 <- ggplot(data=df.kurtosis, aes_(x=df.kurtosis[,1], y=df.kurtosis[,3], color='kurtosis: invader')) +
+  geom_line() +
+  ggtitle('Kurtosis') +
+  xlab('time (years)') + ylab('number of individuals') +
+  theme(legend.position = "bottom") +
+  coord_cartesian(xlim = c(0, time.param$ttb*2)) +
+  geom_vline(xintercept=time.param$ttb, linetype='dashed', color='black')
+
+df.skewness <- intervalAnalysis(df.alphaSim, time.param, fun.call='skewness')
+
+ggp6 <- ggplot(data=df.skewness, aes_(x=df.skewness[,1], y=df.skewness[,3], color='skewness: invader')) +
+  geom_line() +
+  ggtitle('skewness') +
+  xlab('time (years)') + ylab('number of individuals') +
+  theme(legend.position = "bottom") +
+  coord_cartesian(xlim = c(0, time.param$ttb*2)) +
+  geom_vline(xintercept=time.param$ttb, linetype='dashed', color='black')
+
+df.ac <- intervalAnalysis(df.alphaSim, time.param, fun.call='acf')
+
+ggp7 <- ggplot(data=df.ac, aes_(x=df.ac[,1], y=df.ac[,3], color='AC: invader')) +
+  geom_line() +
+  ggtitle('Autocorrelation') +
+  xlab('time (years)') + ylab('number of individuals') +
+  theme(legend.position = "bottom") +
+  coord_cartesian(xlim = c(0, time.param$ttb*2)) +
+  geom_vline(xintercept=time.param$ttb, linetype='dashed', color='black')
+
+
+grid.arrange(ggp3, ggp6, ncol=1)
