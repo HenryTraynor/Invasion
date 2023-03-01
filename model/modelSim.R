@@ -72,3 +72,4 @@ modelSim <- function(att.param, time.param, do.prob = TRUE) {
   }
   return(df.pop)
 }
+
