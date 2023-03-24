@@ -3,11 +3,11 @@ library(moments)
 library(rshift)
 
 #returns df of right-handed standard deviation values over a given window for endemic and invasive species indexed with time
-intervalAnalysis <- function(df.sample, time.param, fun.call) {
+intervalAnalysis <- function(df.sample, time.param, fun.call, ttb) {
   #unpacking
   time.window <- time.param$time.window
   window.step <- time.param$window.step
-  time.max <- time.param$ttb*2
+  time.max <- ttb*2
   tau <- time.param$tau
   
   #calculation of standard deviation values

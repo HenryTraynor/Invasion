@@ -1,4 +1,4 @@
-alphaSim <- function(att.param, time.param, do.prob = TRUE, ratio.max) {
+alphaSim <- function(att.param, time.param, do.prob = TRUE, ratio.max, ttb) {
   
   #unpacking of parameters
   n1 <- att.param$n1 
@@ -15,7 +15,7 @@ alphaSim <- function(att.param, time.param, do.prob = TRUE, ratio.max) {
   del2 <- att.param$del2
   #time params
   tau <- time.param$tau
-  time.max <- time.param$ttb * 2
+  time.max <- ttb * 2
   time.invade <- time.param$time.invade
   
   #indexing
@@ -91,5 +91,6 @@ alphaSim <- function(att.param, time.param, do.prob = TRUE, ratio.max) {
     
     df.pop[step,4] <- a12/a21
   }
+  df.pop = df.pop[-c(2,4)]
   return(df.pop)
 }

@@ -23,10 +23,10 @@ colNames <- c("n1",
 param.table <- cbind(as.data.frame(att.param), as.data.frame(time.param[1]), row.names=NULL)
 
 # set RNG seed for reproducible results:
-set.seed(4563)
+#set.seed(4563)
 
 #test data set
-df.alphaSim <- alphaSim(att.param, time.param, ratio.max=2)
+df.alphaSim <- alphaSim(att.param, time.param, ratio.max=2, ttb=75)
 
 #stat calculation for data set
 #--------------------------------
@@ -110,4 +110,4 @@ ggpRATIO <- ggplot(data=df.alphaSim, aes_(x=df.alphaSim[,1], y=df.alphaSim[,4], 
 
 
 #arrangement
-grid.arrange(ggp1, ggpRATIO, ggpSD, ggpVAR, ggpKURTOSIS, ggpSKEWNESS, ncol=2)
+grid.arrange(ggp1,ncol=1)
