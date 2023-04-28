@@ -20,3 +20,13 @@ time.param <- list(tau = 1/52,
                    time.window = 60,
                    window.step = 1)
 
+#times to bifurcation - LEAVE AT LENGTH 3
+ttb.times <- c(75,
+               100,
+               125)
+
+#desired stats that can be passed through 'rollapply'
+stats <- c('sd',
+           'var',
+           'kurtosis',
+           'skewness')

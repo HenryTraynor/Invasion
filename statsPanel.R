@@ -1,45 +1,42 @@
 library(ggplot2)
-library(gridExtra)
-library(dplyr)
-library(tidyr)
+library(reshape2)
 
-## required files
-source('modelParam.R')
-source('modelSim.R')
-source('../intervalAnalysis.R')
-
-
-
-ttb.times = c(75, 100, 125)
-simulations=3
-stats = c('sd', 'var', 'kurtosis', 'skewness')
-
-for(i in 1:length(ttb.times)){
-  sim_list = replicate(n=simulations,
-                       expr=alphaSim(att.param,time.param,ratio.max=2, ttb=ttb.times[[i]]),
-                       simplify=F)
-  assign(paste0("sim.list.",i), sim_list)
+stats.plots <- function(ttb.times, simulations, stats) {
+  #creates dataset
+  sim_list <- grandSim(ttb.times, simulations)
+  
+  #initialize empty list
+  list.stat <- vector(mode='list', length(stats))
+  #runs stat calculation on each created data frame
+  for(i in 1:length(stats)) {
+    for(j in 1:length(ttb.times)) {
+      list.stat[[i]][[j]] = intervalAnalysis(sim_list[[j]], 
+                                             time.param, 
+                                             fun.call=stats[[i]],
+                                             ttb=ttb.times[[j]])
+    }
+  }
+  
+  #collapses each stat for each ttb
+  for(i in 1:length(list.stat)) {
+    for(j in 1:length(ttb.times)) {
+      list.stat[[i]][[j]] = melt(list.stat[[i]][[j]], id = 'time')
+    }
+  }
+  
+  #initialize emptly list for plots
+  list.ggplots <- vector(mode='list', length(stats))
+  #creates plots with 99% confidence intervals and titles/labels
+  for(i in 1:length(list.stat)) {
+    for(j in 1:length(ttb.times)) {
+      list.ggplots[[i]][[j]] <- ggplot(list.stat[[i]][[j]],aes(time, value)) +
+        stat_summary(geom = "line", fun = mean) +
+        stat_summary(geom = "ribbon", fun.data = mean_cl_normal, alpha = 0.1) +
+        ggtitle(paste0('Invader ',stats[[i]])) +
+        geom_vline(xintercept=ttb.times[[j]], linetype='dashed', color='black') +
+        xlab('time (years)') + ylab('number of individuals')
+    }
+  }
+  
+  return(list.ggplots)
 }
-
-stats = c('sd', 'var', 'kurtosis', 'skewness')
-
-df.invader1 = bind_cols(as.data.frame(sim.list.1[[1]]$time),
-                         as.data.frame(sim.list.1[[1]]$invader),
-                         as.data.frame(sim.list.1[[2]]$invader),
-                         as.data.frame(sim.list.1[[3]]$invader))
-colnames(df.invader1) = c('time', 'invader1', 'invader2', 'invader3')
-
-df.invader2 = bind_cols(as.data.frame(sim.list.2[[1]]$time),
-                        as.data.frame(sim.list.2[[1]]$invader),
-                        as.data.frame(sim.list.2[[2]]$invader),
-                        as.data.frame(sim.list.2[[3]]$invader))
-colnames(df.invader2) = c('time', 'invader1', 'invader2', 'invader3')
-
-df.invader3 = bind_cols(as.data.frame(sim.list.3[[1]]$time),
-                        as.data.frame(sim.list.3[[1]]$invader),
-                        as.data.frame(sim.list.3[[2]]$invader),
-                        as.data.frame(sim.list.3[[3]]$invader))
-colnames(df.invader3) = c('time', 'invader1', 'invader2', 'invader3')
-
-
-dftest = intervalAnalysis(df.invader1, time.param, 'sd', 75)
