@@ -1,5 +1,5 @@
 library(zoo)
-
+library(moments)
 #returns df of right-handed standard deviation values over a given window for endemic and invasive species indexed with time
 intervalAnalysis <- function(df.sample, time.param, fun.call, ttb) {
   #unpacking
