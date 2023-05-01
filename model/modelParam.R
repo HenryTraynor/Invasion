@@ -18,7 +18,7 @@ att.param <- list(n1 = 500,
 time.param <- list(tau = 1/52,
                    time.invade = 0,
                    time.window = 60,
-                   window.step = 1)
+                   window.step = 3)
 
 #times to bifurcation - LEAVE AT LENGTH 3
 ttb.times <- c(75,
@@ -26,7 +26,8 @@ ttb.times <- c(75,
                125)
 
 #desired stats that can be passed through 'rollapply'
-stats <- c('sd',
+stats <- c('mean', 
+           'sd',
            'var',
            'kurtosis',
            'skewness')
