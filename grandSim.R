@@ -1,6 +1,6 @@
 #this script serves as a function to simulate the entire dataset needed for stats calculation
 #CAN ONLY TAKE 3 TTB (i.e. length(ttb.times) must equal 3)!!!!
-
+library(dplyr)
 grandSim <- function(ttb.times, simulations) {
   for(i in 1:length(ttb.times)){
     sim_list = replicate(n=simulations,
