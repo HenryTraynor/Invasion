@@ -31,10 +31,12 @@ stats.plots <- function(ttb.times, simulations, stats) {
     for(j in 1:length(ttb.times)) {
       list.ggplots[[i]][[j]] <- ggplot(list.stat[[i]][[j]],aes(time, value)) +
         stat_summary(geom = "line", fun = mean) +
-        stat_summary(geom = "ribbon", fun.data = mean_cl_normal, alpha = 0.1) +
-        ggtitle(paste0('Invader ',stats[[i]])) +
+        stat_summary(geom = "ribbon", fun.data = mean_cl_normal, alpha = 0.3) +
+        #ggtitle(paste0('Invader ',stats[[i]])) +
         geom_vline(xintercept=ttb.times[[j]], linetype='dashed', color='black') +
-        xlab('time (years)') + ylab('number of individuals')
+        #xlab('time (years)') + ylab('number of individuals')
+        theme(axis.title.y = element_blank()) +
+        theme(axis.title.x = element_blank())
     }
   }
   
