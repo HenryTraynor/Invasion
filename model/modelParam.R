@@ -17,7 +17,7 @@ att.param <- list(n1 = 500,
 #time parameters
 time.param <- list(tau = 1/52,
                    time.invade = 0,
-                   time.window = 60,
+                   time.window = 70,
                    window.step = 3)
 
 #times to bifurcation - LEAVE AT LENGTH 3
