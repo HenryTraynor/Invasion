@@ -1,5 +1,4 @@
 alphaSim <- function(att.param, time.param, do.prob = TRUE, ratio.max, ttb) {
-  
   #unpacking of parameters
   n1 <- att.param$n1 
   n2 <- att.param$n2
