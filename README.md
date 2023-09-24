@@ -32,17 +32,4 @@ When multiplied by a given time interval, the expected number of events for each
 
 **Script Descriptions**
 
-initialCon.R --
-outlines initial conditions and atttributes of species interactions to be passed through the two model scripts
-
-determModel.R --
-deterministic model of competitive interaction
-
-probModel.R -- 
-probabalistic model of competitive interaction using tau leap method and Poisson distribution
-
-plotsAndSuch.R --
-calls function from model scripts and passed parameters to generate plots and other graphical outputs
-*
-*
-*
+NEEDS UPDATE (some in LaTeX file)
