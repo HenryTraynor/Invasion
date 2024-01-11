@@ -55,12 +55,17 @@ alphaSim <- function(att.param, time.param, do.prob = TRUE, ratio.max, ttb) {
     if(do.prob) {
       birth <- rpois(2,birth)
       intra.death <- rpois(2,intra.death)
-      if(0.999*.Machine$integer.max[1] > inter.death[1] || 0.999*.Machine$integer.max[2] > inter.death[2]) {
-        inter.death = round(rnorm(2,mean=inter.death,sd=sqrt(inter.death)))
+      # old NA value fix (doesn't work)
+      #if(0.999*.Machine$integer.max > inter.death[1] || 0.999*.Machine$integer.max > inter.death[2]) {
+        #inter.death <- round(rnorm(2,mean=inter.death,sd=sqrt(inter.death)))
+      #}
+      if(is.na(inter.death[1])) {
+        inter.death[1] <- 0
       }
-      else{
-        inter.death <- rpois(2,inter.death)
+      if(is.na(inter.death[2])) {
+        inter.death[2] <- 0
       }
+      inter.death <- rpois(2,inter.death)
     }
     
     #check for invasion time
@@ -77,12 +82,14 @@ alphaSim <- function(att.param, time.param, do.prob = TRUE, ratio.max, ttb) {
     
     #new entry in df
     change <- birth-intra.death-inter.death+immigration
+    #--------------------------------------------------------ERROR LOCATION
     if (abs(change[1]) > pops[1] && change[1]<0) {
       change[1] <- 0
     } 
     if (abs(change[2]) > pops[2] && change[2]<0) {
       change[2] <- 0
     }
+    #--------------------------------------------------------END
     df.pop[step,2:3] <- pops+change
     
     #step
