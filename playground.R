@@ -16,3 +16,6 @@ test.plot <- ggplot(df.data, aes_(x=df.data[,1], y=df.data[,2])) +
   geom_vline(xintercept=ttb.test, linetype='dashed', color='black')
 
 test.plot
+
+
+plot.test
