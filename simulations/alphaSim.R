@@ -12,7 +12,7 @@ alphaSim <- function(att.param, time.param, do.prob = TRUE, ratio.max, ttb) {
   a22 <- 1
   del1 <- att.param$del1
   del2 <- att.param$del2
-  #time params
+  #time parameters
   tau <- time.param$tau
   time.max <- ttb * 2
   time.invade <- time.param$time.invade
