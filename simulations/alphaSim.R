@@ -38,10 +38,12 @@ alphaSim <- function(att.param, time.param, do.prob = TRUE, ratio.max, ttb, do.f
   
   #a12 for each step
   if(do.fail) {
-    ratio.set <- seq(0)
+    ratio.set <- c(rep(0.25,num.step+1))
   }
-  ratio.set <- seq(0,ratio.max,by=ratio.max/num.step)
-  ratio.set[1] <- ratio.set[2]/2
+  else {
+    ratio.set <- seq(0,ratio.max,by=ratio.max/num.step)
+    ratio.set[1] <- ratio.set[2]/2
+  }
   
   while(time<time.max) {
     step <- step+1
