@@ -1,18 +1,20 @@
-halfAndHalf <- function(ttb, passSimulations, failSimulations) {
-    pass_sim_list = replicate(n=passSimulations,
-                              expr=alphaSim(att.param,time.param,ratio.max=2, ttb=ttb,do.fail=FALSE),
-                              simplify=F)
-    fail_sim_list = replicate(n=failSimulations,
-                              expr=alphaSim(att.param,time.param,ratio.max=2, ttb=ttb,do.fail=TRUE),
-                              simplify=F)
-    data.list = c()
-    for(i in passSimulations) {
-      data.list[[i]] = pass_sim_list[[i]]
-    }
-    for(i in failSimulations) {
-      data.list[[i+passSimulations]] = fail_sim_list[[i]]
-    }
-    
-    df.output = data.frame(success=c(c(rep("pass",passSimulations)),c(rep("fail", failSimulations))),
-                           simulation=c(data.list))
+halfAndHalf <- function(ttb, halfSimulations) {
+  #generates abundance data for halfSimulations where invader wins and halfSimulations where invaders loses
+  
+  #data
+  pass_sim_list = replicate(n=halfSimulations,
+                            expr=alphaSim(att.param,time.param,ratio.max=2, ttb=ttb,do.fail=FALSE),
+                            simplify=F)
+  fail_sim_list = replicate(n=halfSimulations,
+                            expr=alphaSim(att.param,time.param,ratio.max=2, ttb=ttb,do.fail=TRUE),
+                            simplify=F)
+  #initialize df to store data
+  df.data <- data.frame(do.fail=c(rep(FALSE, halfSimulations),rep(TRUE, halfSimulations)),
+                        data=vector(length=halfSimulations*2))
+  #place data in df
+  for(i in 1:halfSimulations) {
+    df.data$data[i]=pass_sim_list[i]
+    df.data$data[i+halfSimulations]=fail_sim_list[i]
+  }
+  return(df.data)
 }
