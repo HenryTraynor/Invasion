@@ -23,27 +23,17 @@ pass_fail <- halfAndHalf(ttb=5,
                          failSimulations=3)
 
 #------------------------------------
-halfSimulations <- 3
 
+df.test <- halfAndHalf(att.param,
+                       singleWindow.time.param,
+                       ttb=50,
+                       halfSimulations=15,
+                       fail.ratio=0.25)
 
-pass_sim_list = c(replicate(n=passSimulations,
-                          expr=alphaSim(att.param,time.param,ratio.max=2, ttb=5,do.fail=FALSE),
-                          simplify=F))
-fail_sim_list = c(replicate(n=failSimulations,
-                          expr=alphaSim(att.param,time.param,ratio.max=2, ttb=5,do.fail=TRUE),
-                          simplify=F))
+df.SD <- singleWindowStat(df.data=df.test,
+                          singleWindow.time.param)
 
-df.data <- data.frame(success=c(rep("pass", halfSimulations),rep("fail", halfSimulations)),
-                      data=vector(length=halfSimulations*2))
+plot(df.SD)
 
-for(i in 1:halfSimulations) {
-  df.data$data[i]=pass_sim_list[i]
-  df.data$data[i+halfSimulations]=fail_sim_list[i]
-}
-
-df.data = as.data.frame(data.list)
-
-df.output = data.frame(success=c(rep("pass",passSimulations),rep("fail", failSimulations)))
-
-
-
+ggplot(data=df.SD,
+       aes(x=stat, y=do.fail)) + geom_point()

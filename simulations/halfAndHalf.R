@@ -1,4 +1,4 @@
-halfAndHalf <- function(ttb, halfSimulations) {
+halfAndHalf <- function(att.param, time.param,ttb, halfSimulations, fail.ratio) {
   #generates abundance data for halfSimulations where invader wins and halfSimulations where invaders loses
   
   #data
@@ -6,7 +6,7 @@ halfAndHalf <- function(ttb, halfSimulations) {
                             expr=alphaSim(att.param,time.param,ratio.max=2, ttb=ttb,do.fail=FALSE),
                             simplify=F)
   fail_sim_list = replicate(n=halfSimulations,
-                            expr=alphaSim(att.param,time.param,ratio.max=2, ttb=ttb,do.fail=TRUE),
+                            expr=alphaSim(att.param,time.param,ratio.max=fail.ratio, ttb=ttb,do.fail=TRUE),
                             simplify=F)
   #initialize df to store data
   df.data <- data.frame(do.fail=c(rep(FALSE, halfSimulations),rep(TRUE, halfSimulations)),

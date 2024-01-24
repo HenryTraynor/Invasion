@@ -20,6 +20,16 @@ time.param <- list(tau = 1/52,
                    time.window = 70,
                    window.step = 3)
 
+singleWindow.time.param <- list(tau = 1/52,
+                                time.invade = 0,
+                                time.window = 52,
+                                time.index = 520)
+
+# singleWindow.time.param <- list(tau,
+#                                 time.invade,
+#                                 time.window = width of window for stat in units tau
+#                                 time.index = location of the left-hand edge of window in units tau
+
 #times to bifurcation - LEAVE AT LENGTH 3
 ttb.times <- c(75,
                100,
