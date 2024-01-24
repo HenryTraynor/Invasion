@@ -15,7 +15,7 @@ att.param <- list(n1 = 500,
                   del2 = 2)
 
 #time parameters
-time.param <- list(tau = 1/365,
+time.param <- list(tau = 1/52,
                    time.invade = 0,
                    time.window = 70,
                    window.step = 3)
