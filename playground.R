@@ -1,4 +1,6 @@
 library(ggplot2)
+library(grid)
+library(gridExtra)
 
 time.param <- list(tau = 1/365,
                    time.invade = 0,
@@ -26,14 +28,36 @@ pass_fail <- halfAndHalf(ttb=5,
 
 df.test <- halfAndHalf(att.param,
                        singleWindow.time.param,
-                       ttb=50,
-                       halfSimulations=15,
+                       ttb=35,
+                       halfSimulations=100,
                        fail.ratio=0.25)
 
 df.SD <- singleWindowStat(df.data=df.test,
                           singleWindow.time.param)
 
-plot(df.SD)
+endemic.data = data.frame(endemic=c(att.param[1],att.param[3],att.param[5],att.param[7],att.param[9],att.param[11]))
+colnames(endemic.data) = c('Initial N', 'Birth Rate', 'Carrying Cap.', 'Initial Inter.', 'Intra.', 'Immigration')
+invader.data = data.frame(invader=c(att.param[2],att.param[4],att.param[6],att.param[8],att.param[10],att.param[12]))
+colnames(invader.data) = c('Initial N', 'Birth Rate', 'Carrying Cap.', 'Initial Inter.', 'Intra.', 'Immigration')
+parameters = rbind(endemic.data, invader.data)
+rownames(parameters) = c("endemic", 'invader')
 
-ggplot(data=df.SD,
-       aes(x=stat, y=do.fail)) + geom_point()
+time.parameters = as.data.frame(t(c('1 Week', '10 Years', '1 Year', '70 Years', '100 each')))
+colnames(time.parameters) = c('Tau', 'Window Start', 'Window Length', 'Run-time', 'Realizations')
+rownames(time.parameters) = c('value')
+
+plot <-ggplot(data=df.SD,
+       aes(x=stat, y=do.fail)) +
+       geom_point(alpha=0.25, size=3) +
+       labs(x='Standard Deviation', y="Invasive fail to invade?") +
+       ggtitle("Standard Deviation for Successful and Unsuccessful Invastions")
+
+grid.arrange(
+  arrangeGrob(plot),
+  tableGrob(parameters),
+  tableGrob(time.parameters),
+  layout_matrix = cbind(c(1,1,1,2,3),
+                        c(1,1,1,2,3),
+                        c(1,1,1,2,3),
+                        c(1,1,1,2,3))
+)
