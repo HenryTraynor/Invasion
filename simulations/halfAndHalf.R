@@ -3,13 +3,13 @@ halfAndHalf <- function(att.param, time.param,ttb, halfSimulations, fail.ratio) 
   
   #data
   pass_sim_list = replicate(n=halfSimulations,
-                            expr=alphaSim(att.param,time.param,ratio.max=2, ttb=ttb,do.fail=FALSE),
+                            expr=alphaSim(att.param,time.param,ratio.max=2, ttb=ttb,do.win=TRUE),
                             simplify=F)
   fail_sim_list = replicate(n=halfSimulations,
-                            expr=alphaSim(att.param,time.param,ratio.max=fail.ratio, ttb=ttb,do.fail=TRUE),
+                            expr=alphaSim(att.param,time.param,ratio.max=fail.ratio, ttb=ttb,do.win=FALSE),
                             simplify=F)
   #initialize df to store data
-  df.data <- data.frame(do.fail=c(rep(FALSE, halfSimulations),rep(TRUE, halfSimulations)),
+  df.data <- data.frame(do.win=c(rep(TRUE, halfSimulations),rep(FALSE, halfSimulations)),
                         data=vector(length=halfSimulations*2))
   #place data in df
   for(i in 1:halfSimulations) {

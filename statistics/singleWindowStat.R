@@ -7,8 +7,8 @@ singleWindowStat <- function(df.data, singleWindow.time.param) {
   time.windowEnd = time.window+time.index
   
   #initialize df for output
-  output <- data.frame(do.fail=df.data$do.fail,
-                       stat=vector(mode="numeric", length=length(df.data$do.fail)))
+  output <- data.frame(do.win=df.data$do.win,
+                       stat=vector(mode="numeric", length=length(df.data$do.win)))
   
   #calculate stat across each input realization
   for(i in 1:length(df.data$data)) {
