@@ -1,4 +1,4 @@
-alphaSim <- function(att.param, time.param, do.prob = TRUE, ratio.max, ttb, do.fail = FALSE) {
+alphaSim <- function(att.param, time.param, do.prob = TRUE, ratio.max, ttb, do.win = TRUE) {
   #unpacking of parameters
   n1 <- att.param$n1 
   n2 <- att.param$n2
@@ -37,7 +37,7 @@ alphaSim <- function(att.param, time.param, do.prob = TRUE, ratio.max, ttb, do.f
   
   
   #a12 for each step
-  if(do.fail) {
+  if(!do.win) {
     ratio.set <- c(rep(ratio.max,num.step+1))
   }
   else {
