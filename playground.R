@@ -46,11 +46,11 @@ time.parameters = as.data.frame(t(c('1 Week', '10 Years', '1 Year', '70 Years', 
 colnames(time.parameters) = c('Tau', 'Window Start', 'Window Length', 'Run-time', 'Realizations')
 rownames(time.parameters) = c('value')
 
-plot <-ggplot(data=df.SD,
-       aes(x=stat, y=do.fail)) +
+plot <-ggplot(data=df.input,
+       aes(x=stat, y=do.win)) +
        geom_point(alpha=0.25, size=3) +
-       labs(x='Standard Deviation', y="Invasive fail to invade?") +
-       ggtitle("Standard Deviation for Successful and Unsuccessful Invastions")
+       labs(x='Standard Deviation', y="Invade?") +
+       ggtitle("Standard Deviation for Successful and Unsuccessful Invasions")
 
 grid.arrange(
   arrangeGrob(plot),
@@ -61,3 +61,24 @@ grid.arrange(
                         c(1,1,1,2,3),
                         c(1,1,1,2,3))
 )
+
+plot(df.rates$FPR,df.rates$TPR)
+
+#-------------------------------------
+df.test <- halfAndHalf(att.param,
+                       singleWindow.time.param,
+                       ttb=25,
+                       halfSimulations=100,
+                       fail.ratio=0.25)
+
+df.input <- singleWindowStat(df.data=df.test,
+                             singleWindow.time.param)
+
+df.rates <- ROCcurveData(df.input, 100)
+
+ROCcurve <- ggplot(data=df.rates,
+                   aes(x=FPR, y=TPR)) + geom_point() + geom_abline(slope=1, intercept=0, linetype=3)
+ROCcurve
+
+AUC(x=df.rates$FPR, y=df.rates$TPR, method='trapezoid')
+
