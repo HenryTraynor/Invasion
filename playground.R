@@ -2,7 +2,7 @@ library(ggplot2)
 library(grid)
 library(gridExtra)
 
-time.param <- list(tau = 1/365,
+time.param <- list(tau = 1/52,
                    time.invade = 0,
                    time.window = 70,
                    window.step = 3)
@@ -28,12 +28,13 @@ pass_fail <- halfAndHalf(ttb=5,
 
 df.test <- halfAndHalf(att.param,
                        singleWindow.time.param,
-                       ttb=35,
-                       halfSimulations=100,
-                       fail.ratio=0.25)
+                       ttb=25,
+                       halfSimulations=10,
+                       fail.ratio=0.1)
 
-df.SD <- singleWindowStat(df.data=df.test,
-                          singleWindow.time.param)
+df.var <- singleWindowStat(df.data=df.test,
+                          singleWindow.time.param,
+                          func="var")
 
 endemic.data = data.frame(endemic=c(att.param[1],att.param[3],att.param[5],att.param[7],att.param[9],att.param[11]))
 colnames(endemic.data) = c('Initial N', 'Birth Rate', 'Carrying Cap.', 'Initial Inter.', 'Intra.', 'Immigration')
@@ -46,9 +47,9 @@ time.parameters = as.data.frame(t(c('1 Week', '10 Years', '1 Year', '70 Years', 
 colnames(time.parameters) = c('Tau', 'Window Start', 'Window Length', 'Run-time', 'Realizations')
 rownames(time.parameters) = c('value')
 
-plot <-ggplot(data=df.input,
+plot <-ggplot(data=df.SD,
        aes(x=stat, y=do.win)) +
-       geom_point(alpha=0.25, size=3) +
+       geom_point(alpha=0.15, size=5) +
        labs(x='Standard Deviation', y="Invade?") +
        ggtitle("Standard Deviation for Successful and Unsuccessful Invasions")
 
@@ -56,10 +57,10 @@ grid.arrange(
   arrangeGrob(plot),
   tableGrob(parameters),
   tableGrob(time.parameters),
-  layout_matrix = cbind(c(1,1,1,2,3),
-                        c(1,1,1,2,3),
-                        c(1,1,1,2,3),
-                        c(1,1,1,2,3))
+  layout_matrix = cbind(c(1,1,1,1,2,3),
+                        c(1,1,1,1,2,3),
+                        c(1,1,1,1,2,3),
+                        c(1,1,1,1,2,3))
 )
 
 plot(df.rates$FPR,df.rates$TPR)

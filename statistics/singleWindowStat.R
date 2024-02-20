@@ -1,4 +1,4 @@
-singleWindowStat <- function(df.data, singleWindow.time.param) {
+singleWindowStat <- function(df.data, singleWindow.time.param, func) {
   #unpacking
   time.window = singleWindow.time.param$time.window
   time.index = singleWindow.time.param$time.index
@@ -13,7 +13,7 @@ singleWindowStat <- function(df.data, singleWindow.time.param) {
   #calculate stat across each input realization
   for(i in 1:length(df.data$data)) {
     datum = df.data$data[i][[1]]
-    output$stat[i] = sd(datum$invader[time.index:time.windowEnd])
+    output$stat[i] = do.call(func , list(datum$invader[time.index:time.windowEnd]))
   }
   return(output)
 }
