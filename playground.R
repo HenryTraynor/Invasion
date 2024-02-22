@@ -29,12 +29,12 @@ pass_fail <- halfAndHalf(ttb=5,
 df.test <- halfAndHalf(att.param,
                        singleWindow.time.param,
                        ttb=25,
-                       halfSimulations=10,
+                       halfSimulations=50,
                        fail.ratio=0.1)
 
-df.var <- singleWindowStat(df.data=df.test,
+df.SD <- singleWindowStat(df.data=df.test,
                           singleWindow.time.param,
-                          func="var")
+                          func="sd")
 
 endemic.data = data.frame(endemic=c(att.param[1],att.param[3],att.param[5],att.param[7],att.param[9],att.param[11]))
 colnames(endemic.data) = c('Initial N', 'Birth Rate', 'Carrying Cap.', 'Initial Inter.', 'Intra.', 'Immigration')
@@ -69,13 +69,15 @@ plot(df.rates$FPR,df.rates$TPR)
 df.test <- halfAndHalf(att.param,
                        singleWindow.time.param,
                        ttb=25,
-                       halfSimulations=100,
+                       halfSimulations=75,
                        fail.ratio=0.25)
 
 df.input <- singleWindowStat(df.data=df.test,
-                             singleWindow.time.param)
+                             singleWindow.time.param,
+                             func="sd")
 
-df.rates <- ROCcurveData(df.input, 100)
+
+df.rates <- ROCcurveData(df.input, numThresholds = 75, inequality = ">")
 
 ROCcurve <- ggplot(data=df.rates,
                    aes(x=FPR, y=TPR)) + geom_point() + geom_abline(slope=1, intercept=0, linetype=3)

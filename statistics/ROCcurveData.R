@@ -1,6 +1,6 @@
 library(DescTools)
 
-ROCcurveData <- function(df.input, numThresholds) {
+ROCcurveData <- function(df.input, numThresholds, inequality) {
   min = df.input$stat[which.min(df.input$stat)]
   max = df.input$stat[which.max(df.input$stat)]
   thresholds = seq(min-0.01, max+(max*.01), length.out=numThresholds)
@@ -19,13 +19,13 @@ ROCcurveData <- function(df.input, numThresholds) {
     for(j in 1:length(df.input$do.win)) {
       if (df.input$do.win[j]) {
         pos=pos+1
-        if(df.input$stat[j]>thresholds[i]) {
+        if(do.call(inequality, list(df.input$stat[j],thresholds[i]))) {
           truePos=truePos+1
         }
       }
       else {
         neg=neg+1
-        if(df.input$stat[j]>thresholds[i]) {
+        if(do.call(inequality, list(df.input$stat[j],thresholds[i]))) {
           falsePos=falsePos+1
         }
       }
