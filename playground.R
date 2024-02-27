@@ -43,8 +43,8 @@ colnames(invader.data) = c('Initial N', 'Birth Rate', 'Carrying Cap.', 'Initial 
 parameters = rbind(endemic.data, invader.data)
 rownames(parameters) = c("endemic", 'invader')
 
-time.parameters = as.data.frame(t(c('1 Week', '10 Years', '1 Year', '70 Years', '100 each')))
-colnames(time.parameters) = c('Tau', 'Window Start', 'Window Length', 'Run-time', 'Realizations')
+time.parameters = as.data.frame(t(c('1 Week', '10 Years', '1 Year', '50 each')))
+colnames(time.parameters) = c('Tau', 'Window Start', 'Window Length', 'Realizations')
 rownames(time.parameters) = c('value')
 
 plot <-ggplot(data=df.SD,
@@ -62,8 +62,6 @@ grid.arrange(
                         c(1,1,1,1,2,3),
                         c(1,1,1,1,2,3))
 )
-
-plot(df.rates$FPR,df.rates$TPR)
 
 #-------------------------------------
 df.test <- halfAndHalf(att.param,
