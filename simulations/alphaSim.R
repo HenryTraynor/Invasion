@@ -45,7 +45,7 @@ alphaSim <- function(att.param, time.param, do.prob = TRUE, ratio.max, ttb, do.w
     ratio.set[1] <- ratio.set[2]/2
   }
   
-  while(time<ttb) {
+  while(time<ttb*2) {
     step <- step+1
     a21 <- a12/ratio.set[step]
     #populations at current timestep as vector
@@ -102,6 +102,6 @@ alphaSim <- function(att.param, time.param, do.prob = TRUE, ratio.max, ttb, do.w
     
     df.pop[step,4] <- a12/a21
   }
-  df.pop = df.pop[-c(2,4)]
+  #df.pop = df.pop[-c(2,4)]
   return(df.pop)
 }
