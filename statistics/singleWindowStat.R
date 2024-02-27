@@ -1,3 +1,5 @@
+library(goeveg)
+
 singleWindowStat <- function(df.data, singleWindow.time.param, func) {
   #unpacking
   time.window = singleWindow.time.param$time.window
@@ -15,7 +17,7 @@ singleWindowStat <- function(df.data, singleWindow.time.param, func) {
     datum = df.data$data[i][[1]]
     output$stat[i] = do.call(func, list(datum$invader[time.index:time.windowEnd]))
   }
-  #output$stat = replace(output$stat, is.na(output$stat), 0)
+  output$stat = replace(output$stat, is.na(output$stat), 0)
   return(output)
 }
 
