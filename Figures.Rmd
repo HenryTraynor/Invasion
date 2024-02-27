@@ -9,12 +9,66 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+```{r parameters}
+att.param <- list(n1 = 500,
+                  n2 = 0,
+                  b1 = 0.65,
+                  b2 = 0.65,
+                  k1 = 500,
+                  k2 = 500,
+                  a12 = 1,
+                  a21 = 1,
+                  a11 = 1,
+                  a22 = 1,
+                  del1 = 0,
+                  del2 = 2)
+
+singleWindow.time.param <- list(tau = 1/52,
+                                time.invade = 0,
+                                time.window = 52,
+                                time.index = 520)
+```
+
 ## 1. Outcomes of Model
 
 These plots display the three outcomes of the Lotka-Volterra Competition model: endemic survival, coexistence, and invader success.
 
 ```{r Outcomes}
-df.endemic <- alphaSim
+
+library(ggplot2)
+library(cowplot)
+library(gridExtra)
+
+df.endemic <- alphaSim(att.param, singleWindow.time.param, ratio.max=0.5, ttb=25, do.win=FALSE)
+df.coexistence <- alphaSim(att.param, singleWindow.time.param, ratio.max=1, ttb=25, do.win=FALSE)
+df.invader <- alphaSim(att.param, singleWindow.time.param, ratio.max=2.0, ttb =25, do.win=FALSE)
+
+endemic.plot <- ggplot(data=df.endemic, aes(x=time)) + 
+                  geom_line(aes(y=endemic, color="Endemic")) + 
+                  geom_line(aes(y=invader, color="Invader")) +
+                  xlab("Time (Years)") +
+                  ylab("Individuals") + theme(legend.position = "none") + ylim(c(0,600))
+
+coexistence.plot <- ggplot(data=df.coexistence, aes(x=time)) + 
+                      geom_line(aes(y=endemic, color="Endemic")) + 
+                      geom_line(aes(y=invader, color="Invader")) +
+                      xlab("Time (Years)") +
+                      ylab("Individuals") + theme(legend.position = "none") + ylim(c(0,600))
+
+invader.plot <- ggplot(data=df.invader, aes(x=time)) +
+                  geom_line(aes(y=endemic, color="Endemic")) + 
+                  geom_line(aes(y=invader, color="Invader")) +
+                  xlab("Time (Years)") +
+                  ylab("Individuals") + theme(legend.position="bottom") + guides(color= guide_legend(title = "Species")) + ylim(c(0,600))
+
+
+legend <- get_legend(invader.plot)
+
+grid.arrange(textGrob("Species Abundance", gp=gpar(size=32)), endemic.plot, coexistence.plot, invader.plot+theme(legend.position="none"), legend, 
+             ncol=3, nrow = 3, 
+             layout_matrix = rbind(c(1,1,1), c(2,3,4), c(5,5,5)),
+             widths = c(10,10,10), heights = c(0.5, 2.5, 0.2))
+  
 ```
 
 ## Including Plots
