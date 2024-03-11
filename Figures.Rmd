@@ -71,12 +71,64 @@ grid.arrange(textGrob("Species Abundance", gp=gpar(size=32)), endemic.plot, coex
   
 ```
 
-## Including Plots
 
-You can also embed plots, for example:
+## 2. Two Types of Realizations
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r Realization}
+df.invaderWin <- alphaSim(att.param, singleWindow.time.param, ratio.max=2, ttb=25, do.win=TRUE)
+df.invaderLose <- alphaSim(att.param, singleWindow.time.param, ratio.max=0.5, ttb=25, do.win=FALSE)
+
+df.realizations <- cbind(df.invaderWin, df.invaderLose)
+colnames(df.realizations) <- c("time1", "endemic1", "invader1", "ratio1", "time2", "endemic2", "invader2", "ratio2")
+
+ggplot(data=df.realizations, aes(x=time1)) + geom_line(aes(y=invader1, color="Invasion")) + geom_line(aes(y=invader2, color="No Invasion")) + xlab("Time (years)") + ylab("Invader Abundance") + ggtitle("Invader abundance for two types of realizations") + guides(color= guide_legend(title = "Realization")) + theme(legend.position="bottom")
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+## 3. Single Window Statistics
+
+```{r Single Window Stats: SD}
+df.test <- halfAndHalf(att.param,
+                       singleWindow.time.param,
+                       ttb=25,
+                       halfSimulations=50,
+                       fail.ratio=0.1)
+
+df.SD <- singleWindowStat(df.data=df.test,
+                          singleWindow.time.param,
+                          func="sd")
+
+endemic.data = data.frame(endemic=c(att.param[1],att.param[3],att.param[5],att.param[7],att.param[9],att.param[11]))
+colnames(endemic.data) = c('Initial N', 'Birth Rate', 'Carrying Cap.', 'Initial Inter.', 'Intra.', 'Immigration')
+invader.data = data.frame(invader=c(att.param[2],att.param[4],att.param[6],att.param[8],att.param[10],att.param[12]))
+colnames(invader.data) = c('Initial N', 'Birth Rate', 'Carrying Cap.', 'Initial Inter.', 'Intra.', 'Immigration')
+parameters = rbind(endemic.data, invader.data)
+rownames(parameters) = c("endemic", 'invader')
+
+time.parameters = as.data.frame(t(c('1 Week', '10 Years', '1 Year', '50 each')))
+colnames(time.parameters) = c('Tau', 'Window Start', 'Window Length', 'Realizations')
+rownames(time.parameters) = c('value')
+
+plot <-ggplot(data=df.SD,
+       aes(x=stat, y=do.win)) +
+       geom_point(alpha=0.15, size=5) +
+       labs(x='Standard Deviation', y="Invade?") +
+       ggtitle("Standard Deviation for Successful and Unsuccessful Invasions")
+
+grid.arrange(
+  arrangeGrob(plot),
+  tableGrob(parameters),
+  tableGrob(time.parameters),
+  layout_matrix = cbind(c(1,1,1,1,2,3),
+                        c(1,1,1,1,2,3),
+                        c(1,1,1,1,2,3),
+                        c(1,1,1,1,2,3))
+)
+```
+## ROC Curve for Single Stat
+
+```{r ROC Curve}
+df.rates <- ROCcurveData(df.SD, numThresholds = 75, inequality = ">")
+auc <- AUC(x=df.rates$FPR, y=df.rates$TPR, method='trapezoid')
+ggplot(data=df.rates, aes(x=FPR, y=TPR), color='red') + geom_point() + geom_abline(slope=1, intercept=0, linetype=3) + ggtitle("TPR vs. FPR for SD as a diagnostic") + theme(legend.position="bottom")
+```
+## 4. ROC Curves for Several Statistics and Realization Types
