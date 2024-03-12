@@ -1,10 +1,6 @@
 library(goeveg)
-
-singleWindowStat <- function(df.data, singleWindow.time.param, func) {
-  #unpacking
-  time.window = singleWindow.time.param$time.window
-  time.index = singleWindow.time.param$time.index
-  
+library(moments)
+singleWindowStat <- function(df.data, time.window, time.index, func) {
   #set right-hand end of stat window in units tau
   time.windowEnd = time.window+time.index
   
