@@ -40,7 +40,7 @@ library(cowplot)
 library(gridExtra)
 
 df.endemic <- alphaSim(att.param, singleWindow.time.param, ratio.max=0.5, ttb=25, do.win=FALSE)
-df.coexistence <- alphaSim(att.param, singleWindow.time.param, ratio.max=1, ttb=25, do.win=FALSE)
+df.coexistence <- alphaSim(att.param, singleWindow.time.param, ratio.max=1, ttb=50, do.win=FALSE)
 df.invader <- alphaSim(att.param, singleWindow.time.param, ratio.max=2.0, ttb =25, do.win=FALSE)
 
 endemic.plot <- ggplot(data=df.endemic, aes(x=time)) + 
@@ -131,4 +131,193 @@ df.rates <- ROCcurveData(df.SD, numThresholds = 75, inequality = ">")
 auc <- AUC(x=df.rates$FPR, y=df.rates$TPR, method='trapezoid')
 ggplot(data=df.rates, aes(x=FPR, y=TPR), color='red') + geom_point() + geom_abline(slope=1, intercept=0, linetype=3) + ggtitle("TPR vs. FPR for SD as a diagnostic") + theme(legend.position="bottom")
 ```
-## 4. ROC Curves for Several Statistics and Realization Types
+## 4. Several Statistics and Realization Types
+
+```{r Statistics}
+# increasing ratio
+df.increasing <- halfAndHalf(att.param, singleWindow.time.param, ttb=25, halfSimulations=50, win.ratio=2, fail.ratio=0.1, increasing=TRUE)
+# constant ratio: a12 > a21
+df.constant <- halfAndHalf(att.param, singleWindow.time.param, ttb=25, halfSimulations=50, win.ratio=2, fail.ratio=0.1, increasing=TRUE)
+
+#statistics
+stats <- c("mean", "sd", "cv", "kurtosis", "skewness")
+windows <- c(52,104,156)
+time.index=520
+
+singleStatWindows <- function(df.data, windows, time.index, statsNum) {
+  df1 <- singleWindowStat(df.data, time.window=windows[1], time.index, func=stats[statsNum])
+  df2 <- singleWindowStat(df.data, time.window=windows[2], time.index, func=stats[statsNum])
+  df3 <- singleWindowStat(df.data, time.window=windows[3], time.index, func=stats[statsNum])
+  df.stat.type <- cbind(df1,df2,df3)
+  colnames(df.stat.type) = c("do.win1", "stat1","do.win2", "stat2","do.win3", "stat3")
+  return(df.stat.type)
+}
+
+dfListing <- function(df.increasing, df.constant) {
+  # mean
+  df.mean.increasing = singleStatWindows(df.increasing, windows, time.index, 1)
+  df.mean.constant = singleStatWindows(df.constant, windows, time.index, 1)
+  # sd
+  df.sd.increasing = singleStatWindows(df.increasing, windows, time.index, 2)
+  df.sd.constant = singleStatWindows(df.constant, windows, time.index, 2)
+  # cv
+  df.cv.increasing = singleStatWindows(df.increasing, windows, time.index, 3)
+  df.cv.constant = singleStatWindows(df.constant, windows, time.index, 3)
+  # kurtosis
+  df.kurtosis.increasing = singleStatWindows(df.increasing, windows, time.index, 4)
+  df.kurtosis.constant = singleStatWindows(df.constant, windows, time.index, 4)
+  # skewness
+  df.skewness.increasing = singleStatWindows(df.increasing, windows, time.index, 5)
+  df.skewness.constant = singleStatWindows(df.constant, windows, time.index, 5)
+  
+  return(list(df.mean.increasing,
+              df.sd.increasing,
+              df.cv.increasing,
+              df.kurtosis.increasing,
+              df.skewness.increasing,
+              df.mean.constant,
+              df.cv.constant,
+              df.kurtosis.constant,
+              df.skewness.constant,
+              df.kurtosis.constant))
+}
+
+statsList <- dfListing(df.increasing, df.constant)
+```
+
+## 5. ROC Data
+
+```{r ROC Curves}
+thresholds=75
+
+ROCdataList <- function(statsList, thresholds) {
+  #increasing
+  df.mean.increasing.roc1 = ROCcurveData(statsList[[1]][1:2], thresholds, ">")
+  df.mean.increasing.roc2 = ROCcurveData(statsList[[1]][3:4],thresholds, ">")
+  df.mean.increasing.roc3 = ROCcurveData(statsList[[1]][5:6],thresholds, ">")
+  df.mean.increasing = cbind(df.mean.increasing.roc1,
+                             df.mean.increasing.roc2,
+                             df.mean.increasing.roc3)
+  colnames(df.mean.increasing) = c("threshold", "TPR1", "FPR1", "threshold2", "TPR2", "FPR2", "threshold3", "TPR3", "FPR3")
+  df.mean.increasing = subset(df.mean.increasing, select=-c(threshold2, threshold3))
+  
+  df.sd.increasing.roc1 = ROCcurveData(statsList[[2]][1:2], thresholds, ">")
+  df.sd.increasing.roc2 = ROCcurveData(statsList[[2]][3:4],thresholds, ">")
+  df.sd.increasing.roc3 = ROCcurveData(statsList[[2]][5:6],thresholds, ">")
+  df.sd.increasing = cbind(df.sd.increasing.roc1,
+                             df.sd.increasing.roc2,
+                             df.sd.increasing.roc3)
+  colnames(df.sd.increasing) = c("threshold", "TPR1", "FPR1", "threshold2", "TPR2", "FPR2", "threshold3", "TPR3", "FPR3")
+  df.sd.increasing = subset(df.sd.increasing, select=-c(threshold2, threshold3))
+  
+  df.cv.increasing.roc1 = ROCcurveData(statsList[[3]][1:2], thresholds, ">")
+  df.cv.increasing.roc2 = ROCcurveData(statsList[[3]][3:4],thresholds, ">")
+  df.cv.increasing.roc3 = ROCcurveData(statsList[[3]][5:6],thresholds, ">")
+  df.cv.increasing = cbind(df.cv.increasing.roc1,
+                             df.cv.increasing.roc2,
+                             df.cv.increasing.roc3)
+  colnames(df.cv.increasing) = c("threshold", "TPR1", "FPR1", "threshold2", "TPR2", "FPR2", "threshold3", "TPR3", "FPR3")
+  df.cv.increasing = subset(df.cv.increasing, select=-c(threshold2, threshold3))
+  
+  df.kurtosis.increasing.roc1 = ROCcurveData(statsList[[4]][1:2], thresholds, ">")
+  df.kurtosis.increasing.roc2 = ROCcurveData(statsList[[4]][3:4],thresholds, ">")
+  df.kurtosis.increasing.roc3 = ROCcurveData(statsList[[4]][5:6],thresholds, ">")
+  df.kurtosis.increasing = cbind(df.kurtosis.increasing.roc1,
+                             df.kurtosis.increasing.roc2,
+                             df.kurtosis.increasing.roc3)
+  colnames(df.kurtosis.increasing) = c("threshold", "TPR1", "FPR1", "threshold2", "TPR2", "FPR2", "threshold3", "TPR3", "FPR3")
+  df.kurtosis.increasing = subset(df.kurtosis.increasing, select=-c(threshold2, threshold3))
+  
+  df.skewness.increasing.roc1 = ROCcurveData(statsList[[5]][1:2], thresholds, ">")
+  df.skewness.increasing.roc2 = ROCcurveData(statsList[[5]][3:4],thresholds, ">")
+  df.skewness.increasing.roc3 = ROCcurveData(statsList[[5]][5:6],thresholds, ">")
+  df.skewness.increasing = cbind(df.skewness.increasing.roc1,
+                             df.skewness.increasing.roc2,
+                             df.skewness.increasing.roc3)
+  colnames(df.skewness.increasing) = c("threshold", "TPR1", "FPR1", "threshold2", "TPR2", "FPR2", "threshold3", "TPR3", "FPR3")
+  df.skewness.increasing = subset(df.skewness.increasing, select=-c(threshold2, threshold3))
+  
+  #constant
+  df.mean.constant.roc1 = ROCcurveData(statsList[[6]][1:2], thresholds, ">")
+  df.mean.constant.roc2 = ROCcurveData(statsList[[6]][3:4],thresholds, ">")
+  df.mean.constant.roc3 = ROCcurveData(statsList[[6]][5:6],thresholds, ">")
+  df.mean.constant = cbind(df.mean.constant.roc1,
+                             df.mean.constant.roc2,
+                             df.mean.constant.roc3)
+  colnames(df.mean.constant) = c("threshold", "TPR1", "FPR1", "threshold2", "TPR2", "FPR2", "threshold3", "TPR3", "FPR3")
+  df.mean.constant = subset(df.mean.constant, select=-c(threshold2, threshold3))
+  
+  df.sd.constant.roc1 = ROCcurveData(statsList[[7]][1:2], thresholds, ">")
+  df.sd.constant.roc2 = ROCcurveData(statsList[[7]][3:4],thresholds, ">")
+  df.sd.constant.roc3 = ROCcurveData(statsList[[7]][5:6],thresholds, ">")
+  df.sd.constant = cbind(df.sd.constant.roc1,
+                             df.sd.constant.roc2,
+                             df.sd.constant.roc3)
+  colnames(df.sd.constant) = c("threshold", "TPR1", "FPR1", "threshold2", "TPR2", "FPR2", "threshold3", "TPR3", "FPR3")
+  df.sd.constant = subset(df.sd.constant, select=-c(threshold2, threshold3))
+  
+  df.cv.constant.roc1 = ROCcurveData(statsList[[8]][1:2], thresholds, ">")
+  df.cv.constant.roc2 = ROCcurveData(statsList[[8]][3:4],thresholds, ">")
+  df.cv.constant.roc3 = ROCcurveData(statsList[[8]][5:6],thresholds, ">")
+  df.cv.constant = cbind(df.cv.constant.roc1,
+                             df.cv.constant.roc2,
+                             df.cv.constant.roc3)
+  colnames(df.cv.constant) = c("threshold", "TPR1", "FPR1", "threshold2", "TPR2", "FPR2", "threshold3", "TPR3", "FPR3")
+  df.cv.constant = subset(df.cv.constant, select=-c(threshold2, threshold3))
+  
+  df.kurtosis.constant.roc1 = ROCcurveData(statsList[[9]][1:2], thresholds, ">")
+  df.kurtosis.constant.roc2 = ROCcurveData(statsList[[9]][3:4],thresholds, ">")
+  df.kurtosis.constant.roc3 = ROCcurveData(statsList[[9]][5:6],thresholds, ">")
+  df.kurtosis.constant = cbind(df.kurtosis.constant.roc1,
+                             df.kurtosis.constant.roc2,
+                             df.kurtosis.constant.roc3)
+  colnames(df.kurtosis.constant) = c("threshold", "TPR1", "FPR1", "threshold2", "TPR2", "FPR2", "threshold3", "TPR3", "FPR3")
+  df.kurtosis.constant = subset(df.kurtosis.constant, select=-c(threshold2, threshold3))
+  
+  df.skewness.constant.roc1 = ROCcurveData(statsList[[10]][1:2], thresholds, ">")
+  df.skewness.constant.roc2 = ROCcurveData(statsList[[10]][3:4],thresholds, ">")
+  df.skewness.constant.roc3 = ROCcurveData(statsList[[10]][5:6],thresholds, ">")
+  df.skewness.constant = cbind(df.skewness.constant.roc1,
+                             df.skewness.constant.roc2,
+                             df.skewness.constant.roc3)
+  colnames(df.skewness.constant) = c("threshold", "TPR1", "FPR1", "threshold2", "TPR2", "FPR2", "threshold3", "TPR3", "FPR3")
+  df.skewness.constant = subset(df.skewness.constant, select=-c(threshold2, threshold3))
+  
+  return(list(df.mean.increasing,
+              df.sd.increasing,
+              df.cv.increasing,
+              df.kurtosis.increasing,
+              df.skewness.increasing,
+              df.mean.constant,
+              df.sd.constant,
+              df.cv.constant,
+              df.kurtosis.constant,
+              df.skewness.constant))
+}
+
+ROCdata <- ROCdataList(statsList, thresholds)
+
+```
+
+## 6. ROC Plots
+
+```{r Plots}
+plotList <- function(ROCdata) {
+  
+}
+
+
+#visual check
+ROCcurve <- ggplot(data=ROCdata[[1]],
+                   aes(x=FPR1, y=TPR1)) + geom_point() + geom_abline(slope=1, intercept=0, linetype=3)
+
+
+# maybe works?
+ROCcurve.sd.increasing <- ggplot() +
+  geom_point(data=ROCdata[[1]], aes(x=FPR1, y=TPR1, color="1 year")) +
+  geom_point(data=ROCdata[[1]], aes(x=FPR2, y=TPR2, color="2 years")) +
+  geom_point(data=ROCdata[[1]], aes(x=FPR3, y=TPR3, color="3 years")) +
+  geom_abline(slope=1, intercept=0, linetype=3)
+  
+```
+
