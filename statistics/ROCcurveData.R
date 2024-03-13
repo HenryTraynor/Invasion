@@ -16,8 +16,8 @@ ROCcurveData <- function(df.input, numThresholds, inequality) {
     pos=0
     neg=0
     # iterate through each realization from halfAndHalf input
-    for(j in 1:length(df.input$do.win)) {
-      if (df.input$do.win[j]) {
+    for(j in 1:length(df.input[,1])) {
+      if (df.input[,1][j]) {
         pos=pos+1
         if(do.call(inequality, list(df.input$stat[j],thresholds[i]))) {
           truePos=truePos+1
