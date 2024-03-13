@@ -137,10 +137,11 @@ ggplot(data=df.rates, aes(x=FPR, y=TPR), color='red') + geom_point() + geom_abli
 # increasing ratio
 df.increasing <- halfAndHalf(att.param, singleWindow.time.param, ttb=25, halfSimulations=50, win.ratio=2, fail.ratio=0.1, increasing=TRUE)
 # constant ratio: a12 > a21
-df.constant <- halfAndHalf(att.param, singleWindow.time.param, ttb=25, halfSimulations=50, win.ratio=2, fail.ratio=0.1, increasing=TRUE)
+df.constant <- halfAndHalf(att.param, singleWindow.time.param, ttb=25, halfSimulations=50, win.ratio=2, fail.ratio=0.1, increasing=FALSE)
 
 #statistics
 stats <- c("mean", "sd", "cv", "kurtosis", "skewness")
+inequalities <- c(">", ">", "<", ">", ">")
 windows <- c(52,104,156)
 time.index=520
 
@@ -153,33 +154,15 @@ singleStatWindows <- function(df.data, windows, time.index, statsNum) {
   return(df.stat.type)
 }
 
-dfListing <- function(df.increasing, df.constant) {
-  # mean
-  df.mean.increasing = singleStatWindows(df.increasing, windows, time.index, 1)
-  df.mean.constant = singleStatWindows(df.constant, windows, time.index, 1)
-  # sd
-  df.sd.increasing = singleStatWindows(df.increasing, windows, time.index, 2)
-  df.sd.constant = singleStatWindows(df.constant, windows, time.index, 2)
-  # cv
-  df.cv.increasing = singleStatWindows(df.increasing, windows, time.index, 3)
-  df.cv.constant = singleStatWindows(df.constant, windows, time.index, 3)
-  # kurtosis
-  df.kurtosis.increasing = singleStatWindows(df.increasing, windows, time.index, 4)
-  df.kurtosis.constant = singleStatWindows(df.constant, windows, time.index, 4)
-  # skewness
-  df.skewness.increasing = singleStatWindows(df.increasing, windows, time.index, 5)
-  df.skewness.constant = singleStatWindows(df.constant, windows, time.index, 5)
-  
-  return(list(df.mean.increasing,
-              df.sd.increasing,
-              df.cv.increasing,
-              df.kurtosis.increasing,
-              df.skewness.increasing,
-              df.mean.constant,
-              df.cv.constant,
-              df.kurtosis.constant,
-              df.skewness.constant,
-              df.kurtosis.constant))
+dfListing <- function(df.increasing, df.constant, stats) {
+  statsList = list()
+  for(i in 1:length(stats)) {
+    df.stat.increasing = singleStatWindows(df.increasing, windows, time.index, i)
+    df.stat.constant = singleStatWindows(df.constant, windows,time.index, i)
+    statsList[[i]] = df.stat.increasing
+    statsList[[length(stats)+i]] = df.stat.constant
+  }
+  return(statsList)
 }
 
 statsList <- dfListing(df.increasing, df.constant)
@@ -188,9 +171,22 @@ statsList <- dfListing(df.increasing, df.constant)
 ## 5. ROC Data
 
 ```{r ROC Curves}
-thresholds=75
+thresholds=100
 
-ROCdataList <- function(statsList, thresholds) {
+ROCdataList <- function(statsList, thresholds, stats, windows, inequalities) {
+  dataList = list()
+  seqj = seq(from=1, to=length(windows)*2, by=2)
+  for(i in 1:length(statsList)) {
+    df = data.frame(nrow=thresholds*2)
+    for(j in seqj) {
+      df.stat.type.roc = ROCcurveData(statsList[[i]][j:j+1], thresholds, inequalities[i%%length(stats)])
+      df.final = cbind(df,df.stat.type.roc)
+    }
+  }
+  
+  # ^^^ doesnt work :( ... yet
+  
+    
   #increasing
   df.mean.increasing.roc1 = ROCcurveData(statsList[[1]][1:2], thresholds, ">")
   df.mean.increasing.roc2 = ROCcurveData(statsList[[1]][3:4],thresholds, ">")
@@ -314,9 +310,9 @@ ROCcurve <- ggplot(data=ROCdata[[1]],
 
 # maybe works?
 ROCcurve.sd.increasing <- ggplot() +
-  geom_point(data=ROCdata[[1]], aes(x=FPR1, y=TPR1, color="1 year")) +
-  geom_point(data=ROCdata[[1]], aes(x=FPR2, y=TPR2, color="2 years")) +
-  geom_point(data=ROCdata[[1]], aes(x=FPR3, y=TPR3, color="3 years")) +
+  geom_point(data=ROCdata[[2]], aes(x=FPR1, y=TPR1, color="1 year")) +
+  geom_point(data=ROCdata[[2]], aes(x=FPR2, y=TPR2, color="2 years")) +
+  geom_point(data=ROCdata[[2]], aes(x=FPR3, y=TPR3, color="3 years")) +
   geom_abline(slope=1, intercept=0, linetype=3)
   
 ```
