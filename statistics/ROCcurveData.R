@@ -1,9 +1,12 @@
 library(DescTools)
 
 ROCcurveData <- function(df.input, numThresholds, inequality) {
-  min = df.input$stat[which.min(df.input$stat)]
-  max = df.input$stat[which.max(df.input$stat)]
-  thresholds = seq(min-0.01, max+(max*.01), length.out=numThresholds)
+  min = min(df.input[2])
+  max = max(df.input[2])
+  #max = df.input$stat[which.max(df.input$stat)]
+  thresholds = seq(from = min-0.01,
+                   to = max+(max*.01), 
+                   length.out=numThresholds)
   
   df.rates = data.frame(threshold=thresholds,
                          TPR=vector("numeric", length=length(thresholds)),
@@ -19,13 +22,13 @@ ROCcurveData <- function(df.input, numThresholds, inequality) {
     for(j in 1:length(df.input[,1])) {
       if (df.input[,1][j]) {
         pos=pos+1
-        if(do.call(inequality, list(df.input$stat[j],thresholds[i]))) {
+        if(do.call(inequality, list(df.input[[2]][j],thresholds[i]))) {
           truePos=truePos+1
         }
       }
       else {
         neg=neg+1
-        if(do.call(inequality, list(df.input$stat[j],thresholds[i]))) {
+        if(do.call(inequality, list(df.input[[2]][j],thresholds[i]))) {
           falsePos=falsePos+1
         }
       }
