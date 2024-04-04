@@ -95,7 +95,7 @@ df.invaderLose <- alphaSim(att.param, singleWindow.time.param, ratio.max=0.5, tt
 df.realizations <- cbind(df.invaderWin, df.invaderLose)
 colnames(df.realizations) <- c("time1", "endemic1", "invader1", "ratio1", "time2", "endemic2", "invader2", "ratio2")
 
-ggplot(data=df.realizations, aes(x=time1)) + geom_line(aes(y=invader1, color="Invasion")) + geom_line(aes(y=invader2, color="No Invasion")) + xlab("Time (years)") + ylab("Invader Abundance") + ggtitle("Invader abundance for two types of realizations") + guides(color= guide_legend(title = "Realization")) + theme(legend.position="bottom")
+ggplot(data=df.realizations, aes(x=time1)) + geom_line(aes(y=invader1), cex=1.5, color="red") + geom_line(aes(y=invader2), cex=1.5, color="blue") + xlab("Time (years)") + ylab("Invader Abundance") + ggtitle("Invader abundance for two types of realizations") + guides(color= guide_legend(title = "Realization")) + theme(legend.position="bottom")
 ```
 
 ## 3. Single Window Statistics
@@ -106,7 +106,7 @@ library(ggplot2)
 df.test <- halfAndHalf(att.param,
                        singleWindow.time.param,
                        ttb=25,
-                       halfSimulations=50,
+                       halfSimulations=100,
                        win.ratio=2,
                        fail.ratio=0.1)
 
@@ -122,13 +122,13 @@ colnames(invader.data) = c('Initial N', 'Birth Rate', 'Carrying Cap.', 'Initial 
 parameters = rbind(endemic.data, invader.data)
 rownames(parameters) = c("endemic", 'invader')
 
-time.parameters = as.data.frame(t(c('1 Week', '10 Years', '1 Year', '50 each')))
+time.parameters = as.data.frame(t(c('1 Week', '10 Years', '1 Year', '100 each')))
 colnames(time.parameters) = c('Tau', 'Window Start', 'Window Length', 'Realizations')
 rownames(time.parameters) = c('value')
 
 plot <-ggplot(data=df.SD,
        aes(x=stat, y=do.win)) +
-       geom_point(alpha=0.15, size=5) +
+       geom_boxplot() +
        labs(x='Standard Deviation', y="Invade?") +
        ggtitle("Standard Deviation for Successful and Unsuccessful Invasions")
 
@@ -146,9 +146,9 @@ grid.arrange(
 
 ```{r ROC Curve}
 library(DescTools)
-df.rates <- ROCcurveData(df.SD, numThresholds = 75, inequality = ">")
+df.rates <- ROCcurveData(df.SD, numThresholds = 200, inequality = ">")
 auc <- AUC(x=df.rates$FPR, y=df.rates$TPR, method='trapezoid')
-ggplot(data=df.rates, aes(x=FPR, y=TPR)) + geom_point() + geom_abline(slope=1, intercept=0, linetype=3) + ggtitle("TPR vs. FPR for SD as a diagnostic") + theme(legend.position="bottom")
+ggplot(data=df.rates, aes(x=FPR, y=TPR)) + geom_point(size=4, color='#549E39') + geom_abline(slope=1, intercept=0, linetype=3, cex=2) + ggtitle("TPR vs. FPR for SD as a diagnostic") + theme(legend.position="bottom")
 ```
 ## 4. Several Statistics and Realization Types
 
@@ -156,9 +156,9 @@ ggplot(data=df.rates, aes(x=FPR, y=TPR)) + geom_point() + geom_abline(slope=1, i
 library(goeveg)
 library(moments)
 # increasing ratio
-df.increasing <- halfAndHalf(att.param, singleWindow.time.param, ttb=25, halfSimulations=50, win.ratio=2, fail.ratio=0.1, increasing=TRUE)
+df.increasing <- halfAndHalf(att.param, singleWindow.time.param, ttb=25, halfSimulations=75, win.ratio=2, fail.ratio=0.1, increasing=TRUE)
 # constant ratio: a12 > a21
-df.constant <- halfAndHalf(att.param, singleWindow.time.param, ttb=25, halfSimulations=50, win.ratio=2, fail.ratio=0.1, increasing=FALSE)
+df.constant <- halfAndHalf(att.param, singleWindow.time.param, ttb=25, halfSimulations=75, win.ratio=2, fail.ratio=0.1, increasing=FALSE)
 
 #statistics
 stats <- c("mean", "sd", "cv", "kurtosis", "skewness")
@@ -194,7 +194,7 @@ statsList <- dfListing(df.increasing, df.constant, stats)
 ## 5. ROC Data
 
 ```{r ROC Curves}
-numThresholds=100
+numThresholds=150
 
 ROCdataList <- function(statsList, numThresholds, stats, windows, inequalities) {
   rocList = list()
@@ -225,9 +225,9 @@ plotList <- function(roc.list) {
   roc.plot.list = list()
   for(i in 1:length(roc.list)) {
     curve.stat.type = ggplot() +
-      geom_point(data=roc.list[[i]], aes(x=FPR1, y=TPR1, color="1 year")) +
-      geom_point(data=roc.list[[i]], aes(x=FPR2, y=TPR2, color="2 years")) +
-      geom_point(data=roc.list[[i]], aes(x=FPR3, y=TPR3, color="3 years")) +
+      geom_line(data=arrange(roc.list[[i]], by_group=TPR1), aes(x=FPR1, y=TPR1, color="1 year"), linewidth=1.5) +
+      geom_line(data=arrange(roc.list[[i]], by_group=TPR2), aes(x=FPR2, y=TPR2, color="2 years"), linewidth=1.5) +
+      geom_line(data=arrange(roc.list[[i]], by_group=TPR3), aes(x=FPR3, y=TPR3, color="3 years"), linewidth=1.5) +
       geom_abline(slope=1, intercept=0, linetype=3) +
       theme(legend.position = "none") +
       xlab("FPR") + ylab("TPR")
