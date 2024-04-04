@@ -51,36 +51,34 @@ library(ggplot2)
 library(cowplot)
 library(gridExtra)
 library(grid)
+library(reshape2)
 
-df.endemic <- alphaSim(att.param, singleWindow.time.param, ratio.max=0.5, ttb=25, do.win=FALSE)
-df.coexistence <- alphaSim(att.param, singleWindow.time.param, ratio.max=1, ttb=50, do.win=FALSE)
-df.invader <- alphaSim(att.param, singleWindow.time.param, ratio.max=2.0, ttb =25, do.win=FALSE)
+setOfAlphaSimPlot <- function(numRealizations, att.param, singleWindow.time.param, do.prob, ratio.max, ttb, do.win) {
+  time.max = ttb*2
+  tau = singleWindow.time.param$tau
+  df.data <- data.frame(time=seq(0,time.max, by=tau))
+  i=0
+  while(i<numRealizations) {
+    df.subData = alphaSim(att.param, singleWindow.time.param, do.prob, ratio.max, ttb, do.win)
+    colnames(df.subData) = c("time", paste("endemic",i+1,sep=""), paste("invader",i+1,sep=""), "ratio")
+    df.data = cbind(df.data, df.subData[2:3])
+    i=i+1
+  }
+  plot = ggplot(data=df.data, aes(x=time)) + xlab("Time (Years)")
+  plot = plot + geom_line(aes(y=endemic1, color="Endemic")) + geom_line(aes(y=invader1, color="Invader"))
+  df.data = melt(df.data, id.vars="time")
+  plot = plot + geom_line(data=df.data, aes(time,value,color=variable), alpha=0.2) + theme(legend.position="none")
+  return(plot)
+}
 
-endemic.plot <- ggplot(data=df.endemic, aes(x=time)) + 
-                  geom_line(aes(y=endemic, color="Endemic")) + 
-                  geom_line(aes(y=invader, color="Invader")) +
-                  xlab("Time (Years)") +
-                  ylab("Individuals") + theme(legend.position = "none") + ylim(c(0,600))
+endemic <- setOfAlphaSimPlot(numRealizations=10, att.param, singleWindow.time.param, do.prob=TRUE, ratio.max=0.5, ttb=50, do.win=FALSE)
+coexistence <- setOfAlphaSimPlot(numRealizations=10, att.param, singleWindow.time.param, do.prob=TRUE, ratio.max=1, ttb=50, do.win=FALSE)
+invader <- setOfAlphaSimPlot(numRealizations=10, att.param, singleWindow.time.param, do.prob=TRUE, ratio.max=2.0, ttb =50, do.win=FALSE)
 
-coexistence.plot <- ggplot(data=df.coexistence, aes(x=time)) + 
-                      geom_line(aes(y=endemic, color="Endemic")) + 
-                      geom_line(aes(y=invader, color="Invader")) +
-                      xlab("Time (Years)") +
-                      ylab("Individuals") + theme(legend.position = "none") + ylim(c(0,600))
-
-invader.plot <- ggplot(data=df.invader, aes(x=time)) +
-                  geom_line(aes(y=endemic, color="Endemic")) + 
-                  geom_line(aes(y=invader, color="Invader")) +
-                  xlab("Time (Years)") +
-                  ylab("Individuals") + theme(legend.position="bottom") + guides(color= guide_legend(title = "Species")) + ylim(c(0,600))
-
-
-legend <- get_legend(invader.plot)
-
-grid.arrange(textGrob("Species Abundance", gp=gpar(size=32)), endemic.plot, coexistence.plot, invader.plot+theme(legend.position="none"), legend, 
-             ncol=3, nrow = 3, 
-             layout_matrix = rbind(c(1,1,1), c(2,3,4), c(5,5,5)),
-             widths = c(10,10,10), heights = c(0.5, 2.5, 0.2))
+grid.arrange(textGrob("Species Abundance", gp=gpar(size=32)), endemic+ylab("Individuals"), coexistence+theme(legend.position="none"), invader, 
+             ncol=3, nrow = 2, 
+             layout_matrix = rbind(c(1,1,1), c(2,3,4)),
+             widths = c(13,13,13), heights = c(0.25, 2.5))
   
 ```
 
@@ -89,13 +87,28 @@ grid.arrange(textGrob("Species Abundance", gp=gpar(size=32)), endemic.plot, coex
 
 ```{r Realization}
 library(ggplot2)
-df.invaderWin <- alphaSim(att.param, singleWindow.time.param, ratio.max=2, ttb=25, do.win=TRUE)
-df.invaderLose <- alphaSim(att.param, singleWindow.time.param, ratio.max=0.5, ttb=25, do.win=FALSE)
 
-df.realizations <- cbind(df.invaderWin, df.invaderLose)
-colnames(df.realizations) <- c("time1", "endemic1", "invader1", "ratio1", "time2", "endemic2", "invader2", "ratio2")
+setOfIncAlphaSimPlot <- function(numRealizations, att.param, singleWindow.time.param, do.prob, ttb) {
+  time.max = ttb*2
+  tau = singleWindow.time.param$tau
+  df.data <- data.frame(time=seq(0,time.max, by=tau))
+  i=0
+  while(i<numRealizations) {
+    df.subData1 = alphaSim(att.param, singleWindow.time.param, do.prob=TRUE, ratio.max=2, ttb=50, do.win=TRUE)
+    colnames(df.subData1) = c("time", paste("endemic",i+1,sep=""), paste("invaderInc",i+1,sep=""), "ratio")
+    df.subData2 = alphaSim(att.param, singleWindow.time.param, do.prob=TRUE, ratio.max=0.5, ttb=50, do.win=FALSE)
+    colnames(df.subData2) = c("time", paste("endemic",i+1,sep=""), paste("invaderConstant",i+1,sep=""), "ratio")
+    df.data = cbind(df.data, df.subData1[3], df.subData2[3])
+    i=i+1
+  }
+  plot = ggplot(data=df.data, aes(x=time)) + xlab("Time(Years)")
+  plot = plot + geom_line(aes(y=invaderInc1, color="Increasing")) + geom_line(aes(y=invaderConstant1, color="Invader"))
+  df.data = melt(df.data, id.vars="time")
+  plot = plot + geom_line(data=df.data, aes(time,value,color=variable), alpha=0.2) + theme(legend.position="none") + ylab("Abundance")
+  return(plot)
+}
 
-ggplot(data=df.realizations, aes(x=time1)) + geom_line(aes(y=invader1, color="Invasion")) + geom_line(aes(y=invader2, color="No Invasion")) + xlab("Time (years)") + ylab("Invader Abundance") + ggtitle("Invader abundance for two types of realizations") + guides(color= guide_legend(title = "Realization")) + theme(legend.position="bottom")
+typesPlot <- setOfIncAlphaSimPlot(10, att.param, singleWindow.time.param, do.prob=TRUE, ttb=50)
 ```
 
 ## 3. Single Window Statistics
