@@ -169,9 +169,9 @@ ggplot(data=df.rates, aes(x=FPR, y=TPR)) + geom_point() + geom_abline(slope=1, i
 library(goeveg)
 library(moments)
 # increasing ratio
-df.increasing <- halfAndHalf(att.param, singleWindow.time.param, ttb=25, halfSimulations=50, win.ratio=2, fail.ratio=0.1, increasing=TRUE)
+df.increasing <- halfAndHalf(att.param, singleWindow.time.param, ttb=25, halfSimulations=100, win.ratio=2, fail.ratio=0.1, increasing=TRUE)
 # constant ratio: a12 > a21
-df.constant <- halfAndHalf(att.param, singleWindow.time.param, ttb=25, halfSimulations=50, win.ratio=2, fail.ratio=0.1, increasing=FALSE)
+df.constant <- halfAndHalf(att.param, singleWindow.time.param, ttb=25, halfSimulations=100, win.ratio=2, fail.ratio=0.1, increasing=FALSE)
 
 #statistics
 stats <- c("mean", "sd", "cv", "kurtosis", "skewness")
@@ -207,7 +207,7 @@ statsList <- dfListing(df.increasing, df.constant, stats)
 ## 5. ROC Data
 
 ```{r ROC Curves}
-numThresholds=100
+numThresholds=200
 
 ROCdataList <- function(statsList, numThresholds, stats, windows, inequalities) {
   rocList = list()
@@ -215,58 +215,89 @@ ROCdataList <- function(statsList, numThresholds, stats, windows, inequalities) 
   for(i in 1:length(statsList)) {
     temp.list = list()
     for(j in 1:length(windows)) {
-      temp.list[[j]] = ROCcurveData(statsList[[i]][c(1,j+1)], numThresholds, inequalities[ineqList[i]])
+      temp.list[[j]] = ROCcurveData(statsList[[i]][c(1,j+1)], numThresholds, inequalities[ineqList[i]], stats[ineqList[i]])
     }
     df.stat.type.roc = cbind(temp.list[[1]],
                              temp.list[[2]],
                              temp.list[[3]])
-    colnames(df.stat.type.roc) = c("threshold", "TPR1", "FPR1", "threshold2", "TPR2", "FPR2", "threshold3", "TPR3", "FPR3")
+    colnames(df.stat.type.roc) = c("threshold", "TPR", "FPR", "threshold2", "TPR2", "FPR2", "threshold3", "TPR3", "FPR3")
     df.stat.type.roc = subset(df.stat.type.roc, select=-c(threshold2, threshold3))
     rocList[[i]] = df.stat.type.roc
   }
   return(rocList)
 }
 
-roc.list <- ROCdataList(statsList, numThresholds, stats, windows, inequalities)
+ROCdata <- function(statsList, numThresholds, stats, windows, inequalities) {
+  columns = c("threshold", "TPR", "FPR", "Statistic", "RealizationType", "WindowSize")
+  roc.df = data.frame(matrix(nrow =0, ncol = length(columns)))
+  colnames(roc.df) = columns
+  ineqList = rep(1:5,2)
+  for(i in 1:length(statsList)) {
+    for(j in 1:length(windows)) {
+      roc.df = rbind(roc.df, ROCcurveData(statsList[[i]][c(1,j+1)], numThresholds, inequalities[ineqList[i]], stats[ineqList[i]]))
+    }
+  }
+  roc.df$RealizationType = data.frame(RealizationType=rbind(matrix(replicate(15*numThresholds, "Increasing")),
+                                 matrix(replicate(15*numThresholds, "Constant"))))
+  roc.df$WindowSize = data.frame(WindowSize = matrix(replicate(2,replicate(5,cbind(replicate(numThresholds,ttb.times[1]),replicate(numThresholds,ttb.times[2]),replicate(numThresholds,ttb.times[3]))))))
+  colnames(roc.df) = columns
+  return(roc.df)
+}
+
+#roc.list <- ROCdataList(statsList, numThresholds, stats, windows, inequalities)
+
+roc.df <- ROCdata(statsList, numThresholds, stats, windows, inequalities)
 ```
 
 ## 6. ROC Plots
 
 ```{r Plot List}
 library(ggplot2)
+library(tidyverse)
 plotList <- function(roc.list) {
   roc.plot.list = list()
   for(i in 1:length(roc.list)) {
     curve.stat.type = ggplot() +
-      geom_point(data=roc.list[[i]], aes(x=FPR1, y=TPR1, color="1 year")) +
-      geom_point(data=roc.list[[i]], aes(x=FPR2, y=TPR2, color="2 years")) +
-      geom_point(data=roc.list[[i]], aes(x=FPR3, y=TPR3, color="3 years")) +
+      geom_line(data=arrange(roc.list[[i]], by_group=TPR1), aes(x=FPR1, y=TPR1, color="1 year"), linewidth=1.5) +
+      geom_line(data=arrange(roc.list[[i]], by_group=TPR2), aes(x=FPR2, y=TPR2, color="2 years"), linewidth=1.5) +
+      geom_line(data=arrange(roc.list[[i]], by_group=TPR3), aes(x=FPR3, y=TPR3, color="3 years"), linewidth=1.5) +
       geom_abline(slope=1, intercept=0, linetype=3) +
       theme(legend.position = "none") +
       xlab("FPR") + ylab("TPR")
     roc.plot.list[[i]] = curve.stat.type
   }
   return(roc.plot.list)
+  arrange
 }
 
 roc.plot.list <- plotList(roc.list)
+
+## with facet
+ggplot(data=roc.df, aes(x=FPR, y=TPR, color=WindowSize)) + geom_point() + facet_grid(Statistic ~ RealizationType)
+
 ```
 
 ```{r out.width="75%", out.height="500%"}
 library(gridExtra)
 library(ggplot2)
-grid.arrange(
+plot1 <- grid.arrange(
   roc.plot.list[[1]],
   roc.plot.list[[2]],
   roc.plot.list[[3]],
   roc.plot.list[[4]],
   roc.plot.list[[5]],
+  ncol=1
+)
+
+plot2 <- grid.arrange(
   roc.plot.list[[6]],
   roc.plot.list[[7]],
   roc.plot.list[[8]],
   roc.plot.list[[9]],
   roc.plot.list[[10]],
-  ncol=2
+  ncol=1
 )
+grid.arrange(plot1,plot2,ncol=2)
+
 ```
 

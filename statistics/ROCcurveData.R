@@ -1,6 +1,6 @@
 library(DescTools)
 
-ROCcurveData <- function(df.input, numThresholds, inequality) {
+ROCcurveData <- function(df.input, numThresholds, inequality, statistic) {
   min = min(df.input[2])
   max = max(df.input[2])
   #max = df.input$stat[which.max(df.input$stat)]
@@ -9,8 +9,11 @@ ROCcurveData <- function(df.input, numThresholds, inequality) {
                    length.out=numThresholds)
   
   df.rates = data.frame(threshold=thresholds,
-                         TPR=vector("numeric", length=length(thresholds)),
-                         FPR=vector("numeric", length=length(thresholds)))
+                        TPR=vector("numeric", length=length(thresholds)),
+                        FPR=vector("numeric", length=length(thresholds)),
+                        statistic=statistic,
+                        realizationType=vector("character", length=length(thresholds)),
+                        windowSize=vector("numeric", length=length(thresholds)))
   # iterate through all thresholds
   for(i in 1:length(thresholds)) {
     # now finding TPR and FPR for a single threshold
