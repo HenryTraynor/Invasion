@@ -5,6 +5,7 @@ date: "`r Sys.Date()`"
 output:
   pdf_document: default
   html_document: default
+  word_document: default
 editor_options:
   chunk_output_type: console
 ---
@@ -87,28 +88,51 @@ grid.arrange(textGrob("Species Abundance", gp=gpar(size=32)), endemic+ylab("Indi
 
 ```{r Realization}
 library(ggplot2)
+library(reshape2)
 
 setOfIncAlphaSimPlot <- function(numRealizations, att.param, singleWindow.time.param, do.prob, ttb) {
-  time.max = ttb*2
+  time.max = 50
   tau = singleWindow.time.param$tau
-  df.data <- data.frame(time=seq(0,time.max, by=tau))
+  df.data <- data.frame(time=seq(0,time.max+tau, by=tau))
   i=0
   while(i<numRealizations) {
-    df.subData1 = alphaSim(att.param, singleWindow.time.param, do.prob=TRUE, ratio.max=2, ttb=50, do.win=TRUE)
-    colnames(df.subData1) = c("time", paste("endemic",i+1,sep=""), paste("invaderInc",i+1,sep=""), "ratio")
-    df.subData2 = alphaSim(att.param, singleWindow.time.param, do.prob=TRUE, ratio.max=0.5, ttb=50, do.win=FALSE)
-    colnames(df.subData2) = c("time", paste("endemic",i+1,sep=""), paste("invaderConstant",i+1,sep=""), "ratio")
+    df.subData1 = alphaSim(att.param, singleWindow.time.param, do.prob=TRUE, ratio.max=2, ttb=25, do.win=TRUE)
+    df.subData1 = cbind(df.subData1, data.frame(index=replicate(length(seq(0,time.max+tau, by=tau)), paste(i))))
+    colnames(df.subData1) = c("time", paste("endemic",i+1,sep=""), paste("invaderInc",i+1,sep=""), "ratio", "index")
+    
+    df.subData2 = alphaSim(att.param, singleWindow.time.param, do.prob=TRUE, ratio.max=0.5, ttb=25, do.win=FALSE)
+    df.subData2 = cbind(df.subData2, data.frame(index=replicate(length(seq(0,time.max+tau, by=tau)), paste(i))))
+    colnames(df.subData2) = c("time", paste("endemic",i+1,sep=""), paste("invaderConstant",i+1,sep=""), "ratio", "index")
+    
     df.data = cbind(df.data, df.subData1[3], df.subData2[3])
     i=i+1
   }
-  plot = ggplot(data=df.data, aes(x=time)) + xlab("Time(Years)")
-  plot = plot + geom_line(aes(y=invaderInc1, color="Increasing")) + geom_line(aes(y=invaderConstant1, color="Invader"))
-  df.data = melt(df.data, id.vars="time")
-  plot = plot + geom_line(data=df.data, aes(time,value,color=variable), alpha=0.2) + theme(legend.position="none") + ylab("Abundance")
+  plot = ggplot(data=df.data, aes(x=time)) + geom_line(aes(y=df.data[,2]), color="red") +  geom_line(aes(y=df.data[,3]), color="blue") + xlab("Time (Years)")
+  #plot = plot + geom_line(aes(y=invaderInc1, color="red")) + geom_line(aes(y=invaderConstant1, color="blue"))
+  seqj = seq(4,numRealizations*2+1, by=2)
+  for(j in seqj) {
+    plot = plot + geom_line(aes(x=time,y=df.data[,j]), color="red", alpha=0.2) + geom_line(aes(x=time,y=df.data[,j+1]), color="blue", alpha=0.2)
+  }
+  plot = plot + theme(legend.position="none") + ylab("Abundance")
   return(plot)
 }
 
-typesPlot <- setOfIncAlphaSimPlot(10, att.param, singleWindow.time.param, do.prob=TRUE, ttb=50)
+time.max = 50
+tau = singleWindow.time.param$tau
+df.dataI <- data.frame(time=seq(0,time.max+tau, by=tau), index=replicate(numRealizations*(time.max/tau+2), NA))
+
+columnsI = c("time", "index", "invader")
+
+df.dataI <- data.frame(matrix(nrow =0, ncol = length(columnsI)))
+colnames(df.dataI) <- columnsI
+
+for(i in numRealizations) {
+  tempI = alphaSim(att.param, singleWindow.time.param, do.prob=TRUE, ratio.max=2, ttb=25, do.win=TRUE)
+  df.dataI = rbind(df.dataI, cbind(select(tempI, time, invader),replicate(length(tempI[,1]), i)))
+}
+
+
+setOfIncAlphaSimPlot(10, att.param, singleWindow.time.param, do.prob=TRUE, ttb=50)
 ```
 
 ## 3. Single Window Statistics
@@ -159,7 +183,7 @@ grid.arrange(
 
 ```{r ROC Curve}
 library(DescTools)
-df.rates <- ROCcurveData(df.SD, numThresholds = 75, inequality = ">")
+df.rates <- ROCcurveData(df.SD, numThresholds = 75, inequality = ">", statistic="sd")
 auc <- AUC(x=df.rates$FPR, y=df.rates$TPR, method='trapezoid')
 ggplot(data=df.rates, aes(x=FPR, y=TPR)) + geom_point() + geom_abline(slope=1, intercept=0, linetype=3) + ggtitle("TPR vs. FPR for SD as a diagnostic") + theme(legend.position="bottom")
 ```
@@ -207,44 +231,25 @@ statsList <- dfListing(df.increasing, df.constant, stats)
 ## 5. ROC Data
 
 ```{r ROC Curves}
+library(tidyverse)
 numThresholds=200
 
-ROCdataList <- function(statsList, numThresholds, stats, windows, inequalities) {
-  rocList = list()
-  ineqList = rep(1:5,2)
-  for(i in 1:length(statsList)) {
-    temp.list = list()
-    for(j in 1:length(windows)) {
-      temp.list[[j]] = ROCcurveData(statsList[[i]][c(1,j+1)], numThresholds, inequalities[ineqList[i]], stats[ineqList[i]])
-    }
-    df.stat.type.roc = cbind(temp.list[[1]],
-                             temp.list[[2]],
-                             temp.list[[3]])
-    colnames(df.stat.type.roc) = c("threshold", "TPR", "FPR", "threshold2", "TPR2", "FPR2", "threshold3", "TPR3", "FPR3")
-    df.stat.type.roc = subset(df.stat.type.roc, select=-c(threshold2, threshold3))
-    rocList[[i]] = df.stat.type.roc
-  }
-  return(rocList)
-}
-
 ROCdata <- function(statsList, numThresholds, stats, windows, inequalities) {
-  columns = c("threshold", "TPR", "FPR", "Statistic", "RealizationType", "WindowSize")
+  columns = c("threshold", "TPR", "FPR", "Statistic", "realizationType", "windowSize")
   roc.df = data.frame(matrix(nrow =0, ncol = length(columns)))
   colnames(roc.df) = columns
   ineqList = rep(1:5,2)
   for(i in 1:length(statsList)) {
     for(j in 1:length(windows)) {
-      roc.df = rbind(roc.df, ROCcurveData(statsList[[i]][c(1,j+1)], numThresholds, inequalities[ineqList[i]], stats[ineqList[i]]))
+      roc.df = rbind(roc.df, arrange(.data=ROCcurveData(statsList[[i]][c(1,j+1)], numThresholds, inequalities[ineqList[i]], stats[ineqList[i]]), by_group=TPR))
     }
   }
-  roc.df$RealizationType = data.frame(RealizationType=rbind(matrix(replicate(15*numThresholds, "Increasing")),
-                                 matrix(replicate(15*numThresholds, "Constant"))))
-  roc.df$WindowSize = data.frame(WindowSize = matrix(replicate(2,replicate(5,cbind(replicate(numThresholds,ttb.times[1]),replicate(numThresholds,ttb.times[2]),replicate(numThresholds,ttb.times[3]))))))
+  roc.df$realizationType = c(matrix(replicate(15*numThresholds, "Increasing")),
+                                 matrix(replicate(15*numThresholds, "Constant")))
+  roc.df$windowSize = c(replicate(2,replicate(5,cbind(replicate(numThresholds,ttb.times[1]),replicate(numThresholds,ttb.times[2]),replicate(numThresholds,ttb.times[3])))))
   colnames(roc.df) = columns
   return(roc.df)
 }
-
-#roc.list <- ROCdataList(statsList, numThresholds, stats, windows, inequalities)
 
 roc.df <- ROCdata(statsList, numThresholds, stats, windows, inequalities)
 ```
@@ -254,50 +259,11 @@ roc.df <- ROCdata(statsList, numThresholds, stats, windows, inequalities)
 ```{r Plot List}
 library(ggplot2)
 library(tidyverse)
-plotList <- function(roc.list) {
-  roc.plot.list = list()
-  for(i in 1:length(roc.list)) {
-    curve.stat.type = ggplot() +
-      geom_line(data=arrange(roc.list[[i]], by_group=TPR1), aes(x=FPR1, y=TPR1, color="1 year"), linewidth=1.5) +
-      geom_line(data=arrange(roc.list[[i]], by_group=TPR2), aes(x=FPR2, y=TPR2, color="2 years"), linewidth=1.5) +
-      geom_line(data=arrange(roc.list[[i]], by_group=TPR3), aes(x=FPR3, y=TPR3, color="3 years"), linewidth=1.5) +
-      geom_abline(slope=1, intercept=0, linetype=3) +
-      theme(legend.position = "none") +
-      xlab("FPR") + ylab("TPR")
-    roc.plot.list[[i]] = curve.stat.type
-  }
-  return(roc.plot.list)
-  arrange
-}
-
-roc.plot.list <- plotList(roc.list)
 
 ## with facet
-ggplot(data=roc.df, aes(x=FPR, y=TPR, color=WindowSize)) + geom_point() + facet_grid(Statistic ~ RealizationType)
-
-```
-
-```{r out.width="75%", out.height="500%"}
-library(gridExtra)
-library(ggplot2)
-plot1 <- grid.arrange(
-  roc.plot.list[[1]],
-  roc.plot.list[[2]],
-  roc.plot.list[[3]],
-  roc.plot.list[[4]],
-  roc.plot.list[[5]],
-  ncol=1
-)
-
-plot2 <- grid.arrange(
-  roc.plot.list[[6]],
-  roc.plot.list[[7]],
-  roc.plot.list[[8]],
-  roc.plot.list[[9]],
-  roc.plot.list[[10]],
-  ncol=1
-)
-grid.arrange(plot1,plot2,ncol=2)
-
+ggplot(data=roc.df, aes(x=FPR, y=TPR, color=windowSize)) + 
+  geom_line(aes(group=windowSize)) + 
+  facet_grid(Statistic ~ realizationType) +
+  geom_abline(slope=1, intercept=0, linetype=3)
 ```
 
