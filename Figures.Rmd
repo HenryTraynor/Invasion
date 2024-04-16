@@ -47,19 +47,15 @@ source("statistics/ROCcurveData.R")
 These plots display the three outcomes of the Lotka-Volterra Competition model: endemic survival, coexistence, and invader success.
 
 ```{r Outcomes}
-
 library(ggplot2)
 library(gridExtra)
-
 numRealizations=5
 endemic_list <- replicate(numRealizations,
                           alphaSim(att.param, singleWindow.time.param, ratio.max=0.5, ttb=25, do.win=FALSE),
                           simplify=F)
-
 coexistence_list <- replicate(numRealizations,
-                              alphaSim(att.param, singleWindow.time.param, ratio.max=1, ttb=25, do.win=FALSE),
+                              alphaSim(att.param, singleWindow.time.param, ratio.max=1, ttb=100, do.win=FALSE),
                               simplify=F)
-
 invader_list <- replicate(numRealizations,
                           alphaSim(att.param, singleWindow.time.param, ratio.max=2.0, ttb=25, do.win=FALSE),
                           simplify=F)
@@ -67,25 +63,28 @@ invader_list <- replicate(numRealizations,
 endemicPlot = ggplot()
 coexistencePlot = ggplot()
 invaderPlot = ggplot()
-
 for(i in 1:numRealizations) {
   #iterates through and adds the curve for endemic and invader 'numRealizations' times
-  endemicPlot = endemicPlot + geom_line(data=endemic_list[[i]], aes(x=time, y=invader), color="red", alpha=0.2) + geom_line(data=endemic_list[[i]], aes(x=time, y=endemic), color="blue", alpha=0.2)
-  
-  coexistencePlot = coexistencePlot + geom_line(data=coexistence_list[[i]], aes(x=time, y=invader), color="red", alpha=0.2) + geom_line(data=coexistence_list[[i]], aes(x=time, y=endemic), color="blue", alpha=0.2)
-  
-  invaderPlot = invaderPlot + geom_line(data=invader_list[[i]], aes(x=time, y=invader), color="red", alpha=0.2) + geom_line(data=invader_list[[i]], aes(x=time, y=endemic), color="blue", alpha=0.2)
+  endemicPlot = endemicPlot + geom_line(data=endemic_list[[i]], aes(x=time, y=invader), color="red", alpha=0.1) + geom_line(data=endemic_list[[i]], aes(x=time, y=endemic), color="blue", alpha=0.1)
+  coexistencePlot = coexistencePlot + geom_line(data=coexistence_list[[i]], aes(x=time, y=invader), color="red", alpha=0.1) + geom_line(data=coexistence_list[[i]], aes(x=time, y=endemic), color="blue", alpha=0.1)
+  invaderPlot = invaderPlot + geom_line(data=invader_list[[i]], aes(x=time, y=invader), color="red", alpha=0.1) + geom_line(data=invader_list[[i]], aes(x=time, y=endemic), color="blue", alpha=0.1)
 }
 # add alpha=1.0 curves
-endemicPlot = endemicPlot + geom_line(data=endemic_list[[1]], aes(x=time, y=invader), color="red") + geom_line(data=endemic_list[[1]], aes(x=time, y=endemic), color="blue")
-coexistencePlot = coexistencePlot + geom_line(data=coexistence_list[[1]], aes(x=time, y=invader), color="red") + geom_line(data=coexistence_list[[1]], aes(x=time, y=endemic), color="blue")
-invaderPlot = invaderPlot + geom_line(data=invader_list[[1]], aes(x=time, y=invader), color="red") + geom_line(data=invader_list[[1]], aes(x=time, y=endemic), color="blue")
+endemicPlot = endemicPlot + geom_line(data=endemic_list[[1]], aes(x=time, y=invader), color="red") + geom_line(data=endemic_list[[1]], aes(x=time, y=endemic), color="blue") + xlab("Time (years)")
+coexistencePlot = coexistencePlot + geom_line(data=coexistence_list[[1]], aes(x=time, y=invader), color="red") + geom_line(data=coexistence_list[[1]], aes(x=time, y=endemic), color="blue") + xlab("Time (years)")
+invaderPlot = invaderPlot + geom_line(data=invader_list[[1]], aes(x=time, y=invader, color="Invader")) + geom_line(data=invader_list[[1]], aes(x=time, y=endemic, color="Endemic")) + xlab("Time (years)")  + scale_color_manual(name="Species", values=c("Invader"="red", "Endemic"="blue")) + theme(legend.position="bottom")
 
+legend = get_legend(invaderPlot)
 
-grid.arrange(textGrob("Species Abundance for Three Outcomes", gp=gpar(size=32)), endemicPlot+ylab("Individuals"), coexistencePlot+theme(axis.title.y=element_blank()), invaderPlot+theme(axis.title.y=element_blank()), 
-             ncol=3, nrow = 2, 
-             layout_matrix = rbind(c(1,1,1), c(2,3,4)),
-             widths = c(13,13,13), heights = c(0.25, 2.5))
+grid.arrange(textGrob("Species Abundance for Three Outcomes", gp=gpar(size=32)),
+             endemicPlot+ylab("Individuals"),
+             coexistencePlot+theme(axis.title.y=element_blank()),
+             invaderPlot+theme(axis.title.y=element_blank()) + theme(legend.position="none"),
+             legend,
+             ncol=3, nrow = 3, 
+             layout_matrix = rbind(c(1,1,1), c(2,3,4), c(5,5,5)),
+             widths = c(13,13,13), heights = c(0.25, 2.5, 0.25)
+             )
   
 ```
 
@@ -95,7 +94,7 @@ grid.arrange(textGrob("Species Abundance for Three Outcomes", gp=gpar(size=32)),
 ```{r Realization}
 library(ggplot2)
 
-numRealizations=10
+numRealizations=50
 inc_list = replicate(n=numRealizations,
                      expr=alphaSim(att.param, singleWindow.time.param, do.prob=TRUE, ratio.max=2, ttb=25, do.win=TRUE),
                      simplify=F)
@@ -108,9 +107,7 @@ for(i in 1:numRealizations) {
   plot = plot + geom_line(data=inc_list[[i]], aes(x=time, y=invader), color="red", alpha=0.1)
   plot = plot + geom_line(data=const_list[[i]], aes(x=time, y=invader), color="blue", alpha=0.1)
 }
-plot = plot +
-  geom_line(data=inc_list[[1]], aes(x=time, y=invader, color="red")) +
-  geom_line(data=const_list[[1]], aes(x=time, y=invade, color="blue"))
+plot = plot + geom_line(data=inc_list[[1]], aes(x=time, y=invader, color="Increasing")) + geom_line(data=const_list[[1]], aes(x=time, y=invader, color="Constant")) + scale_color_manual(name="Realization Types", values=c("Increasing"="red", "Constant"="blue"))
 
 plot + ggtitle("Two Types of Model Realizations") + ylab("Invader Abundance") + xlab("Time (years)")
 ```
