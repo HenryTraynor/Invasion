@@ -16,25 +16,6 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r parameters}
 set.seed(1)
-
-att.param <- list(n1 = 500,
-                  n2 = 0,
-                  b1 = 0.65,
-                  b2 = 0.65,
-                  k1 = 500,
-                  k2 = 500,
-                  a12 = 1,
-                  a21 = 1,
-                  a11 = 1,
-                  a22 = 1,
-                  del1 = 0,
-                  del2 = 2)
-
-singleWindow.time.param <- list(tau = 1/52,
-                                time.invade = 0,
-                                time.window = 52,
-                                time.index = 520)
-
 source("parameter/modelParam.R")
 source("simulations/alphaSim.R")
 source("statistics/singleWindowStat.R")
@@ -231,6 +212,26 @@ ROCdata <- function(statsList, numThresholds, stats, windows, inequalities) {
 roc.df <- ROCdata(statsList, numThresholds, stats, windows, inequalities)
 ```
 
+```{r J-stat}
+#NOT FINISHED -- need to think about how to interface with facet
+library(tidyverse)
+ROCjStat <- function(roc.df, windows) {
+  optimums = list()
+  for(w in windows) {
+    tempW = roc.df %>% filter(windowSize==m)
+    for(i in 1:length(roc.data.list)) {
+      temp = roc.data.list[[i]]
+      diff = vector("numeric", length=length(temp[,1]))
+      for(j in 1:length(diff)) {
+        diff[j] = temp$TPR[j] - temp$FPR[j]
+      }
+      optimums[[i]] = c(temp$TPR[which.max(diff)], temp$FPR[which.max(diff)])
+    }
+  }
+  return(optimums)
+}
+```
+
 ## 6. ROC Plots
 
 ```{r Plot List}
@@ -239,8 +240,50 @@ library(tidyverse)
 
 ## with facet
 ggplot(data=roc.df, aes(x=FPR, y=TPR, color=windowSize)) + 
-  geom_line(aes(group=windowSize)) + 
+  geom_line(aes(group=windowSize), linewidth=1.5) + 
   facet_grid(Statistic ~ realizationType) +
   geom_abline(slope=1, intercept=0, linetype=3)
+```
+
+## 7. AUC vs. TTB
+
+```{r AUCvsTTB}
+library(DescTools)
+AUCvsTTB <- function(ttbRange, numTTB, stats, inequalities, halfSimulations, numThresholds, windowSize) {
+  ttbSeq = seq(from=ttbRange[1], to=ttbRange[2], length=numTTB)
+  columns = c("AUC", "TTB", "Statistic")
+  df.auc = data.frame(matrix(nrow = 0, ncol = length(columns)))
+  colnames(df.auc) = columns
+  
+  for(i in 1:length(stats)) {
+    for(ttb in ttbSeq) {
+      df.data = halfAndHalf(att.param, singleWindow.time.param, ttb, halfSimulations, win.ratio=2.0, fail.ratio=0.1, increasing=TRUE)
+      
+      df.stat = singleWindowStat(df.data, time.window=windowSize, time.index=ttb*52/2, func=stats[i])
+      
+      df.rates = ROCcurveData(df.stat, numThresholds, inequalities[i], stats[i])
+      
+      auc = AUC(x=df.rates$FPR, y=df.rates$TPR, method='trapezoid')
+      bind = c(auc, ttb, stats[i])
+      df.auc = rbind(df.auc, bind)
+      colnames(df.auc) = columns
+    }
+  }
+  return(df.auc)
+}
+
+df.auc <- AUCvsTTB(ttbRange=c(10,25),
+                   numTTB=5,
+                   stats,
+                   inequalities,
+                   halfSimulations=10,
+                   numThresholds=10,
+                   windowSize=104)
+  
+
+```
+
+```{r plotting AUC vs TTB}
+ggplot(data=df.auc, aes(x=TTB, y=AUC))+ geom_line(aes(group=Statistic)) + facet_grid(Statistic ~ .)
 ```
 
