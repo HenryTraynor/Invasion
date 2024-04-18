@@ -29,7 +29,9 @@ These plots display the three outcomes of the Lotka-Volterra Competition model: 
 
 ```{r Outcomes}
 library(ggplot2)
+library(grid)
 library(gridExtra)
+library(cowplot)
 numRealizations=5
 endemic_list <- replicate(numRealizations,
                           alphaSim(att.param, singleWindow.time.param, ratio.max=0.5, ttb=25, do.win=FALSE),
@@ -90,7 +92,7 @@ for(i in 1:numRealizations) {
 }
 plot = plot + geom_line(data=inc_list[[1]], aes(x=time, y=invader, color="Increasing")) + geom_line(data=const_list[[1]], aes(x=time, y=invader, color="Constant")) + scale_color_manual(name="Realization Types", values=c("Increasing"="red", "Constant"="blue"))
 
-plot + ggtitle("Two Types of Model Realizations") + ylab("Invader Abundance") + xlab("Time (years)")
+plot + ylab("Invader Abundance") + xlab("Time (years)") + theme(legend.position="bottom")
 ```
 
 ## 3. Single Window Statistics
@@ -272,18 +274,18 @@ AUCvsTTB <- function(ttbRange, numTTB, stats, inequalities, halfSimulations, num
   return(df.auc)
 }
 
-df.auc <- AUCvsTTB(ttbRange=c(10,25),
-                   numTTB=5,
-                   stats,
-                   inequalities,
-                   halfSimulations=10,
-                   numThresholds=10,
-                   windowSize=104)
+#df.auc <- AUCvsTTB(ttbRange=c(10,25),
+#                   numTTB=15,
+#                   stats,
+#                   inequalities,
+#                   halfSimulations=10,
+#                   numThresholds=10,
+#                   windowSize=104)
   
 
 ```
 
 ```{r plotting AUC vs TTB}
-ggplot(data=df.auc, aes(x=TTB, y=AUC))+ geom_line(aes(group=Statistic)) + facet_grid(Statistic ~ .)
+#ggplot(data=df.auc, aes(x=TTB, y=AUC))+ geom_line(aes(group=Statistic)) + facet_grid(Statistic ~ .)
 ```
 
