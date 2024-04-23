@@ -77,7 +77,7 @@ grid.arrange(textGrob("Species Abundance for Three Outcomes", gp=gpar(size=32)),
 ```{r Realization}
 library(ggplot2)
 
-numRealizations=50
+numRealizations=25
 inc_list = replicate(n=numRealizations,
                      expr=alphaSim(att.param, singleWindow.time.param, do.prob=TRUE, ratio.max=2, ttb=25, do.win=TRUE),
                      simplify=F)
