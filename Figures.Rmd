@@ -32,7 +32,7 @@ library(ggplot2)
 library(grid)
 library(gridExtra)
 library(cowplot)
-numRealizations=5
+numRealizations=10
 endemic_list <- replicate(numRealizations,
                           alphaSim(att.param, singleWindow.time.param, ratio.max=0.5, ttb=25, do.win=FALSE),
                           simplify=F)
@@ -59,14 +59,13 @@ invaderPlot = invaderPlot + geom_line(data=invader_list[[1]], aes(x=time, y=inva
 
 legend = get_legend(invaderPlot)
 
-grid.arrange(textGrob("Species Abundance for Three Outcomes", gp=gpar(size=32)),
-             endemicPlot+ylab("Individuals"),
-             coexistencePlot+theme(axis.title.y=element_blank()),
-             invaderPlot+theme(axis.title.y=element_blank()) + theme(legend.position="none"),
+grid.arrange(endemicPlot+ylab("Individuals") + labs(tag="A"),
+             coexistencePlot+theme(axis.title.y=element_blank())+labs(tag="B"),
+             invaderPlot+theme(axis.title.y=element_blank()) + theme(legend.position="none")+labs(tag="C"),
              legend,
-             ncol=3, nrow = 3, 
-             layout_matrix = rbind(c(1,1,1), c(2,3,4), c(5,5,5)),
-             widths = c(13,13,13), heights = c(0.25, 2.5, 0.25)
+             ncol=3, nrow = 2, 
+             layout_matrix = rbind(c(1,2,3),c(4,4,4)),
+             widths = c(13,13,13), heights = c(2.5, 0.25)
              )
   
 ```
@@ -76,23 +75,32 @@ grid.arrange(textGrob("Species Abundance for Three Outcomes", gp=gpar(size=32)),
 
 ```{r Realization}
 library(ggplot2)
+library(cowplot)
 
-numRealizations=25
+numRealizations=10
 inc_list = replicate(n=numRealizations,
                      expr=alphaSim(att.param, singleWindow.time.param, do.prob=TRUE, ratio.max=2, ttb=25, do.win=TRUE),
                      simplify=F)
-const_list = replicate(n=numRealizations,
-                       expr=alphaSim(att.param, singleWindow.time.param, do.prob=TRUE, ratio.max=0.5, ttb=25, do.win=FALSE),
-                       simplify=F)
+const_high_list = replicate(n=numRealizations,
+                            expr=alphaSim(att.param, singleWindow.time.param, do.prob=TRUE, ratio.max=1.5, ttb=25, do.win=FALSE),
+                            simplify=F)
+const_low_list = replicate(n=numRealizations,
+                           expr=alphaSim(att.param, singleWindow.time.param, do.prob=TRUE, ratio.max=0.5, ttb=25, do.win=FALSE),
+                           simplify=F)
 
 plot = ggplot()
 for(i in 1:numRealizations) {
-  plot = plot + geom_line(data=inc_list[[i]], aes(x=time, y=invader), color="red", alpha=0.1)
-  plot = plot + geom_line(data=const_list[[i]], aes(x=time, y=invader), color="blue", alpha=0.1)
+  plot = plot + geom_line(data=inc_list[[i]], aes(x=time, y=invader), color="red", alpha=0.2)
+  plot = plot + geom_line(data=const_high_list[[i]], aes(x=time, y=invader), color="#00BA38", alpha=0.2)
+  plot = plot + geom_line(data=const_low_list[[i]], aes(x=time, y=invader), color="blue", alpha=0.2)
 }
-plot = plot + geom_line(data=inc_list[[1]], aes(x=time, y=invader, color="Increasing")) + geom_line(data=const_list[[1]], aes(x=time, y=invader, color="Constant")) + scale_color_manual(name="Realization Types", values=c("Increasing"="red", "Constant"="blue"))
+plot = plot + geom_line(data=inc_list[[1]], aes(x=time, y=invader, color="Increasing")) + geom_line(data=const_high_list[[1]], aes(x=time, y=invader, color="Constant1")) + geom_line(data=const_low_list[[1]], aes(x=time, y=invader, color="Constant2"))+ scale_color_manual(name="Realization Types", values=c("Increasing"="red", "Constant2"="blue", "Constant1"="#00BA38")) + xlab("Time (years)") + ylab("Invader Abundance")
+
+plot.inset = ggplot() + geom_line(data=inc_list[[1]], aes(x=time, y=ratio, color="red")) + geom_segment(aes(x=0, y=1.5, xend=50, yend=1.5, color="#00BA38")) + geom_segment(aes(x=0, y=0.5, xend=50, yend=0.5, color="blue")) + geom_segment(aes(x=0, y=1, xend=50, yend=1), linetype="dashed") + xlab("Time (years)") + ylab("Ratio") + scale_color_identity()
 
 plot + ylab("Invader Abundance") + xlab("Time (years)") + theme(legend.position="bottom")
+
+plot.with.inset <- ggdraw() + draw_plot(plot) + draw_plot(plot.inset, x=0.07, y=0.7, width=0.3, height=0.3)
 ```
 
 ## 3. Single Window Statistics
