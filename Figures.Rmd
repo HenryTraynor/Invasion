@@ -94,13 +94,13 @@ for(i in 1:numRealizations) {
   plot = plot + geom_line(data=const_high_list[[i]], aes(x=time, y=invader), color="#00BA38", alpha=0.2)
   plot = plot + geom_line(data=const_low_list[[i]], aes(x=time, y=invader), color="blue", alpha=0.2)
 }
-plot = plot + geom_line(data=inc_list[[1]], aes(x=time, y=invader, color="Increasing")) + geom_line(data=const_high_list[[1]], aes(x=time, y=invader, color="Constant1")) + geom_line(data=const_low_list[[1]], aes(x=time, y=invader, color="Constant2"))+ scale_color_manual(name="Realization Types", values=c("Increasing"="red", "Constant2"="blue", "Constant1"="#00BA38")) + xlab("Time (years)") + ylab("Invader Abundance")
+plot = plot + geom_line(data=inc_list[[1]], aes(x=time, y=invader, color="Increasing Invader CA")) + geom_line(data=const_high_list[[1]], aes(x=time, y=invader, color="Constant Invader CA")) + geom_line(data=const_low_list[[1]], aes(x=time, y=invader, color="Invader Failure"))+ scale_color_manual(name="Realization Types", values=c("Increasing Invader CA"="red", "Invader Failure"="blue", "Constant Invader CA"="#00BA38")) + xlab("Time (years)") + ylab("Invader Abundance")
 
 plot.inset = ggplot() + geom_line(data=inc_list[[1]], aes(x=time, y=ratio, color="red")) + geom_segment(aes(x=0, y=1.5, xend=50, yend=1.5, color="#00BA38")) + geom_segment(aes(x=0, y=0.5, xend=50, yend=0.5, color="blue")) + geom_segment(aes(x=0, y=1, xend=50, yend=1), linetype="dashed") + xlab("Time (years)") + ylab("Ratio") + scale_color_identity()
 
 plot + ylab("Invader Abundance") + xlab("Time (years)") + theme(legend.position="bottom")
 
-plot.with.inset <- ggdraw() + draw_plot(plot) + draw_plot(plot.inset, x=0.07, y=0.7, width=0.3, height=0.3)
+plot.with.inset <- ggdraw() + draw_plot(plot) + draw_plot(plot.inset, x=0.07, y=0.7, width=0.3, height=0.3) + theme(text=element_text(size=12))
 ```
 
 ## 3. Single Window Statistics
@@ -168,13 +168,13 @@ df.constant <- halfAndHalf(att.param, singleWindow.time.param, ttb=25, halfSimul
 #statistics
 stats <- c("mean", "sd", "cv", "kurtosis", "skewness")
 inequalities <- c(">", ">", "<", "<", "<")
-windows <- c(52,104,156)
+windows <- c("52","104","156")
 time.index=520
 
 singleStatWindows <- function(df.data, windows, time.index, statsNum) {
-  df1 <- singleWindowStat(df.data, time.window=windows[1], time.index, func=stats[statsNum])
-  df2 <- singleWindowStat(df.data, time.window=windows[2], time.index, func=stats[statsNum])
-  df3 <- singleWindowStat(df.data, time.window=windows[3], time.index, func=stats[statsNum])
+  df1 <- singleWindowStat(df.data, time.window=as.numeric(windows[1]), time.index, func=stats[statsNum])
+  df2 <- singleWindowStat(df.data, time.window=as.numeric(windows[2]), time.index, func=stats[statsNum])
+  df3 <- singleWindowStat(df.data, time.window=as.numeric(windows[3]), time.index, func=stats[statsNum])
   df.stat.type <- cbind(df1,df2,df3)
   colnames(df.stat.type) = c("do.win", "stat1","do.win2", "stat2","do.win3", "stat3")
   return(df.stat.type)
@@ -212,14 +212,15 @@ ROCdata <- function(statsList, numThresholds, stats, windows, inequalities) {
       roc.df = rbind(roc.df, arrange(.data=ROCcurveData(statsList[[i]][c(1,j+1)], numThresholds, inequalities[ineqList[i]], stats[ineqList[i]]), by_group=TPR))
     }
   }
-  roc.df$realizationType = c(matrix(replicate(15*numThresholds, "Increasing")),
-                                 matrix(replicate(15*numThresholds, "Constant")))
-  roc.df$windowSize = c(replicate(2,replicate(5,cbind(replicate(numThresholds,ttb.times[1]),replicate(numThresholds,ttb.times[2]),replicate(numThresholds,ttb.times[3])))))
+  roc.df$realizationType = c(matrix(replicate(15*numThresholds, "Increasing Invader CA")),
+                                 matrix(replicate(15*numThresholds, "Constant Invader CA")))
+  roc.df$windowSize = c(replicate(2,replicate(5,cbind(replicate(numThresholds,windows[1]),replicate(numThresholds,windows[2]),replicate(numThresholds,windows[3])))))
   colnames(roc.df) = columns
   return(roc.df)
 }
 
 roc.df <- ROCdata(statsList, numThresholds, stats, windows, inequalities)
+roc.df$windowSize = as.character(roc.df$windowSize)
 ```
 
 ```{r J-stat}
@@ -242,17 +243,39 @@ ROCjStat <- function(roc.df, windows) {
 }
 ```
 
+## ROC AUC
+```{r}
+aucs = matrix(nrow=0, ncol=4,byrow=TRUE)
+colnames(aucs)=c("statistic", "realizationType", "windowSize", "AUC")
+
+for (n in stats) {
+  for(m in c("Increasing Invader CA", "Constant Invader CA")) {
+    for(k in windows) {
+      data1 = subset(roc.df, Statistic==n & realizationType==m & windowSize==k)
+      auc=AUC(x=data1$FPR, y=data1$TPR, method='trapezoid')
+      aucs=rbind(aucs, c(n,m,k,auc))
+    }
+  }
+}
+```
 ## 6. ROC Plots
 
 ```{r Plot List}
 library(ggplot2)
 library(tidyverse)
 
-## with facet
-ggplot(data=roc.df, aes(x=FPR, y=TPR, color=windowSize)) + 
+# labels
+stat.labs <- c("Mean", "SD", "CV", "Kurtosis", "Skewness")
+names(stat.labs) <- stats
+
+# with facet_grid
+p = ggplot(data=roc.df, aes(x=FPR, y=TPR, color=windowSize)) + 
   geom_line(aes(group=windowSize), linewidth=1.5) + 
-  facet_grid(Statistic ~ realizationType) +
-  geom_abline(slope=1, intercept=0, linetype=3)
+  facet_grid(Statistic ~ realizationType,
+             labeller=labeller(Statistic=stat.labs)) +
+  geom_abline(slope=1, intercept=0, linetype=3) + 
+  guides(color=guide_legend(title="Window Size")) +
+  theme(legend.position = "bottom", text=element_text(size=12))
 ```
 
 ## 7. AUC vs. TTB
@@ -282,18 +305,18 @@ AUCvsTTB <- function(ttbRange, numTTB, stats, inequalities, halfSimulations, num
   return(df.auc)
 }
 
-#df.auc <- AUCvsTTB(ttbRange=c(10,25),
-#                   numTTB=15,
-#                   stats,
-#                   inequalities,
-#                   halfSimulations=10,
-#                   numThresholds=10,
-#                   windowSize=104)
+df.auc <- AUCvsTTB(ttbRange=c(10,50),
+                   numTTB=80,
+                   stats,
+                   inequalities,
+                   halfSimulations=75,
+                   numThresholds=150,
+                   windowSize=104)
   
 
 ```
 
 ```{r plotting AUC vs TTB}
-#ggplot(data=df.auc, aes(x=TTB, y=AUC))+ geom_line(aes(group=Statistic)) + facet_grid(Statistic ~ .)
+ggplot(data=df.auc, aes(x=TTB, y=AUC))+ geom_line(aes(group=Statistic)) + facet_grid(Statistic ~ .)
 ```
 
