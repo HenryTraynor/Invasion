@@ -37,7 +37,7 @@ endemic_list <- replicate(numRealizations,
                           alphaSim(att.param, singleWindow.time.param, ratio.max=0.5, ttb=25, do.win=FALSE),
                           simplify=F)
 coexistence_list <- replicate(numRealizations,
-                              alphaSim(att.param, singleWindow.time.param, ratio.max=1, ttb=100, do.win=FALSE),
+                              alphaSim(att.param, singleWindow.time.param, ratio.max=1, ttb=75, do.win=FALSE),
                               simplify=F)
 invader_list <- replicate(numRealizations,
                           alphaSim(att.param, singleWindow.time.param, ratio.max=2.0, ttb=25, do.win=FALSE),
@@ -94,13 +94,34 @@ for(i in 1:numRealizations) {
   plot = plot + geom_line(data=const_high_list[[i]], aes(x=time, y=invader), color="#00BA38", alpha=0.2)
   plot = plot + geom_line(data=const_low_list[[i]], aes(x=time, y=invader), color="blue", alpha=0.2)
 }
-plot = plot + geom_line(data=inc_list[[1]], aes(x=time, y=invader, color="Increasing Invader CA")) + geom_line(data=const_high_list[[1]], aes(x=time, y=invader, color="Constant Invader CA")) + geom_line(data=const_low_list[[1]], aes(x=time, y=invader, color="Invader Failure"))+ scale_color_manual(name="Realization Types", values=c("Increasing Invader CA"="red", "Invader Failure"="blue", "Constant Invader CA"="#00BA38")) + xlab("Time (years)") + ylab("Invader Abundance")
+plot = plot + geom_line(data=inc_list[[1]], aes(x=time, y=invader, color="Increasing Invader CA")) + geom_line(data=const_high_list[[1]], aes(x=time, y=invader, color="Constant High Invader CA")) + geom_line(data=const_low_list[[1]], aes(x=time, y=invader, color="Constant Low Invader CA"))+ scale_color_manual(name="Realization Types", values=c("Increasing Invader CA"="red", "Constant Low Invader CA"="blue", "Constant High Invader CA"="#00BA38")) + xlab("Time (years)") + ylab("Invader Abundance")
 
 plot.inset = ggplot() + geom_line(data=inc_list[[1]], aes(x=time, y=ratio, color="red")) + geom_segment(aes(x=0, y=1.5, xend=50, yend=1.5, color="#00BA38")) + geom_segment(aes(x=0, y=0.5, xend=50, yend=0.5, color="blue")) + geom_segment(aes(x=0, y=1, xend=50, yend=1), linetype="dashed") + xlab("Time (years)") + ylab("Ratio") + scale_color_identity()
 
 plot + ylab("Invader Abundance") + xlab("Time (years)") + theme(legend.position="bottom")
 
 plot.with.inset <- ggdraw() + draw_plot(plot) + draw_plot(plot.inset, x=0.07, y=0.7, width=0.3, height=0.3) + theme(text=element_text(size=12))
+```
+
+``` {r Graphic plots}
+library(ggplot2)
+library(cowplot)
+
+numRealizations=50
+inc_list = replicate(n=numRealizations,
+                     expr=alphaSim(att.param, singleWindow.time.param, do.prob=TRUE, ratio.max=2, ttb=25, do.win=TRUE),
+                     simplify=F)
+
+const_low_list = replicate(n=numRealizations,
+                           expr=alphaSim(att.param, singleWindow.time.param, do.prob=TRUE, ratio.max=0.5, ttb=25, do.win=FALSE),
+                           simplify=F)
+
+plot = ggplot()
+for(i in 1:numRealizations) {
+  plot = plot + geom_line(data=inc_list[[i]], aes(x=time, y=invader), color="red", alpha=0.2)
+  plot = plot + geom_line(data=const_low_list[[i]], aes(x=time, y=invader), color="blue", alpha=0.2)
+}
+plot = plot + geom_line(data=inc_list[[1]], aes(x=time, y=invader, color="Increasing Invader CA")) +  geom_line(data=const_low_list[[1]], aes(x=time, y=invader, color="Constant Low Invader CA"))+ scale_color_manual(name="Realization Types", values=c("Increasing Invader CA"="red", "Constant Low Invader CA"="blue")) + xlab("Time (years)") + ylab("Invader Abundance") + geom_segment(aes(x=25, y=0, xend=25, yend=500), linetype="dashed")
 ```
 
 ## 3. Single Window Statistics
@@ -133,9 +154,13 @@ rownames(time.parameters) = c('value')
 
 plot <-ggplot(data=df.SD,
        aes(x=stat, y=do.win)) +
-       geom_point(alpha=0.15, size=5) +
-       labs(x='Standard Deviation', y="Invade?") +
-       ggtitle("Standard Deviation for Successful and Unsuccessful Invasions")
+       geom_point(alpha=0.25, size=8, aes(color=do.win)) +
+       labs(x='Standard Deviation', y="Invasion") +
+       scale_color_manual(name = "Invasion Success",
+                          values = c("TRUE" = "red",
+                                     "FALSE"= "blue"),
+                          labels= c("Successful", "Unsuccessful"))
+  
 
 grid.arrange(
   arrangeGrob(plot),
@@ -169,6 +194,7 @@ df.constant <- halfAndHalf(att.param, singleWindow.time.param, ttb=25, halfSimul
 stats <- c("mean", "sd", "cv", "kurtosis", "skewness")
 inequalities <- c(">", ">", "<", "<", "<")
 windows <- c("52","104","156")
+windowStarts <- c("520", "780", "1040")
 time.index=520
 
 singleStatWindows <- function(df.data, windows, time.index, statsNum) {
@@ -221,26 +247,6 @@ ROCdata <- function(statsList, numThresholds, stats, windows, inequalities) {
 
 roc.df <- ROCdata(statsList, numThresholds, stats, windows, inequalities)
 roc.df$windowSize = as.character(roc.df$windowSize)
-```
-
-```{r J-stat}
-#NOT FINISHED -- need to think about how to interface with facet
-library(tidyverse)
-ROCjStat <- function(roc.df, windows) {
-  optimums = list()
-  for(w in windows) {
-    tempW = roc.df %>% filter(windowSize==m)
-    for(i in 1:length(roc.data.list)) {
-      temp = roc.data.list[[i]]
-      diff = vector("numeric", length=length(temp[,1]))
-      for(j in 1:length(diff)) {
-        diff[j] = temp$TPR[j] - temp$FPR[j]
-      }
-      optimums[[i]] = c(temp$TPR[which.max(diff)], temp$FPR[which.max(diff)])
-    }
-  }
-  return(optimums)
-}
 ```
 
 ## ROC AUC
@@ -318,5 +324,83 @@ df.auc <- AUCvsTTB(ttbRange=c(10,50),
 
 ```{r plotting AUC vs TTB}
 ggplot(data=df.auc, aes(x=TTB, y=AUC))+ geom_line(aes(group=Statistic)) + facet_grid(Statistic ~ .)
+```
+
+```{r ROC data for different window positions}
+windowStarts <- c("520", "780", "1040")
+
+singleStatWindows <- function(df.data, windowStarts, statsNum) {
+  df1 <- singleWindowStat(df.data, time.window=52, time.index=as.numeric(windowStarts[1]), func=stats[statsNum])
+  df2 <- singleWindowStat(df.data, time.window=52, time.index=as.numeric(windowStarts[2]), func=stats[statsNum])
+  df3 <- singleWindowStat(df.data, time.window=52, time.index=as.numeric(windowStarts[3]), func=stats[statsNum])
+  df.stat.type <- cbind(df1,df2,df3)
+  colnames(df.stat.type) = c("do.win", "stat1","do.win2", "stat2","do.win3", "stat3")
+  return(df.stat.type)
+}
+
+dfListing <- function(df.increasing, df.constant, stats) {
+  statsList = list()
+  for(i in 1:length(stats)) {
+    df.stat.increasing = singleStatWindows(df.increasing, windowStarts, i)
+    df.stat.increasing = subset(df.stat.increasing, select = -c(do.win2, do.win3))
+    df.stat.constant = singleStatWindows(df.constant, windowStarts, i)
+    df.stat.constant = subset(df.stat.constant, select = -c(do.win2, do.win3))
+    statsList[[i]] = df.stat.increasing
+    statsList[[length(stats)+i]] = df.stat.constant
+  }
+  return(statsList)
+}
+
+statsList <- dfListing(df.increasing, df.constant, stats)
+
+numThresholds=200
+
+ROCdata <- function(statsList, numThresholds, stats, windowStarts, inequalities) {
+  columns = c("threshold", "TPR", "FPR", "Statistic", "realizationType", "windowStart")
+  roc.df = data.frame(matrix(nrow =0, ncol = length(columns)))
+  colnames(roc.df) = columns
+  ineqList = rep(1:5,2)
+  for(i in 1:length(statsList)) {
+    for(j in 1:length(windowStarts)) {
+      roc.df = rbind(roc.df, arrange(.data=ROCcurveData(statsList[[i]][c(1,j+1)], numThresholds, inequalities[ineqList[i]], stats[ineqList[i]]), by_group=TPR))
+    }
+  }
+  roc.df$realizationType = c(matrix(replicate(15*numThresholds, "Increasing Invader CA")),
+                                 matrix(replicate(15*numThresholds, "Constant High Invader CA")))
+  roc.df$windowStart = c(replicate(2,replicate(5,cbind(replicate(numThresholds,windowStarts[1]),replicate(numThresholds,windowStarts[2]),replicate(numThresholds,windowStarts[3])))))
+  return(roc.df)
+}
+
+roc.df <- ROCdata(statsList, numThresholds, stats, windowStarts, inequalities)
+roc.df$windowStart = as.character(roc.df$windowStart)
+
+aucs = matrix(nrow=0, ncol=4,byrow=TRUE)
+colnames(aucs)=c("statistic", "realizationType", "windowStart", "AUC")
+
+for (n in stats) {
+  for(m in c("Increasing Invader CA", "Constant Invader CA")) {
+    for(k in windowStarts) {
+      data1 = subset(roc.df, statistic==n & realizationType==m & windowStart==k)
+      auc=AUC(x=data1$FPR, y=data1$TPR, method='trapezoid')
+      aucs=rbind(aucs, c(n,m,k,auc))
+    }
+  }
+}
+
+library(ggplot2)
+library(tidyverse)
+
+# labels
+stat.labs <- c("Mean", "SD", "CV", "Kurtosis", "Skewness")
+names(stat.labs) <- stats
+
+# with facet_grid
+p = ggplot(data=roc.df, aes(x=FPR, y=TPR, color=windowStart)) + 
+  geom_line(aes(group=windowStart), linewidth=1.5) + 
+  facet_grid(statistic ~ realizationType,
+             labeller=labeller(statistic=stat.labs)) +
+  geom_abline(slope=1, intercept=0, linetype=3) + 
+  guides(color=guide_legend(title="Window Start")) +
+  theme(legend.position = "bottom", text=element_text(size=12))
 ```
 
