@@ -394,13 +394,16 @@ library(tidyverse)
 stat.labs <- c("Mean", "SD", "CV", "Kurtosis", "Skewness")
 names(stat.labs) <- stats
 
+roc.df$distBifurcation <- replicate(length(roc.df$windowStart), 52*25) - as.numeric(roc.df$windowStart)
+roc.df$distBifurcation = as.character(roc.df$distBifurcation)
+
 # with facet_grid
-p = ggplot(data=roc.df, aes(x=FPR, y=TPR, color=windowStart)) + 
-  geom_line(aes(group=windowStart), linewidth=1.5) + 
+p = ggplot(data=roc.df, aes(x=FPR, y=TPR, color=distBifurcation)) + 
+  geom_line(aes(group=distBifurcation), linewidth=1.5) + 
   facet_grid(statistic ~ realizationType,
              labeller=labeller(statistic=stat.labs)) +
   geom_abline(slope=1, intercept=0, linetype=3) + 
-  guides(color=guide_legend(title="Window Start")) +
+  guides(color=guide_legend(title="Distance to Bifurcation")) +
   theme(legend.position = "bottom", text=element_text(size=12))
 ```
 
