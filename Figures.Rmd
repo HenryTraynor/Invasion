@@ -378,7 +378,7 @@ aucs = matrix(nrow=0, ncol=4,byrow=TRUE)
 colnames(aucs)=c("statistic", "realizationType", "windowStart", "AUC")
 
 for (n in stats) {
-  for(m in c("Increasing Invader CA", "Constant Invader CA")) {
+  for(m in c("Increasing Invader CA", "Constant High Invader CA")) {
     for(k in windowStarts) {
       data1 = subset(roc.df, statistic==n & realizationType==m & windowStart==k)
       auc=AUC(x=data1$FPR, y=data1$TPR, method='trapezoid')
@@ -386,6 +386,8 @@ for (n in stats) {
     }
   }
 }
+aucs <- as.data.frame(aucs)
+aucs$distBifurcation <- replicate(length(aucs$AUC), 52*25) - as.numeric(aucs$windowStart)
 
 library(ggplot2)
 library(tidyverse)
@@ -398,12 +400,13 @@ roc.df$distBifurcation <- replicate(length(roc.df$windowStart), 52*25) - as.nume
 roc.df$distBifurcation = as.character(roc.df$distBifurcation)
 
 # with facet_grid
-p = ggplot(data=roc.df, aes(x=FPR, y=TPR, color=distBifurcation)) + 
+p= ggplot(data=roc.df, aes(x=FPR, y=TPR, color=distBifurcation)) + 
   geom_line(aes(group=distBifurcation), linewidth=1.5) + 
   facet_grid(statistic ~ realizationType,
              labeller=labeller(statistic=stat.labs)) +
   geom_abline(slope=1, intercept=0, linetype=3) + 
-  guides(color=guide_legend(title="Distance to Bifurcation")) +
+  guides(color=guide_legend(title="Distance to Bifurcation (weeks)")) +
+  ylab("True Positive Rate") + xlab("False Positive Rate") +
   theme(legend.position = "bottom", text=element_text(size=12))
 ```
 
